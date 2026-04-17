@@ -13,21 +13,6 @@ The system is built with a strong focus on:
 
 It enables users to move from manual, paper-based tracking to a structured digital system that provides visibility, traceability, and basic analytics.
 
----
-
-## Problem Statement
-
-Many small- to medium-scale agricultural operations in Kenya still rely on manual methods to track crop progress. This results in:
-
-- Poor visibility across distributed fields
-- Delayed decision-making
-- Lack of historical data
-- Inefficient coordination between field agents and managers
-
-SmartSeason addresses these challenges by providing a centralized system for field monitoring and reporting.
-
----
-
 ## Core Features
 
 ### 1. User Roles & Access Control
@@ -41,8 +26,6 @@ SmartSeason addresses these challenges by providing a centralized system for fie
   - View assigned fields
   - Submit updates and observations
 
----
-
 ### 2. Field Management
 
 Each field contains:
@@ -53,8 +36,6 @@ Each field contains:
 - Current growth stage
 - Assigned agent
 - Location (county / optional GPS)
-
----
 
 ### 3. Field Updates (Audit Trail)
 
@@ -67,8 +48,6 @@ Each field contains:
   - Full traceability
   - Historical analysis capability
 
----
-
 ### 4. Field Lifecycle
 
 Fields follow a simple lifecycle:
@@ -77,8 +56,6 @@ Fields follow a simple lifecycle:
 - Growing
 - Ready
 - Harvested
-
----
 
 ### 5. Field Status Logic
 
@@ -95,8 +72,6 @@ Field status is computed dynamically:
 
 This avoids stale data and enables real-time insights.
 
----
-
 ### 6. Dashboards
 
 #### Admin Dashboard
@@ -112,8 +87,6 @@ This avoids stale data and enables real-time insights.
 - Latest updates
 - Quick update actions
 
----
-
 ### 7. Offline-Tolerant Design
 
 The system is designed with rural usage in mind:
@@ -121,8 +94,6 @@ The system is designed with rural usage in mind:
 - Handles delayed updates
 - Supports eventual synchronization
 - Minimizes payload sizes for low bandwidth usage
-
----
 
 ## System Architecture
 
@@ -134,8 +105,6 @@ The system is designed with rural usage in mind:
 - **Cache Layer**: Redis
 - **Authentication**: Supabase Auth
 - **Storage**: Supabase Storage (images)
-
----
 
 ## Tech Stack
 
@@ -157,8 +126,6 @@ The system is designed with rural usage in mind:
 
 - Supabase (Database, Auth, Storage)
 
----
-
 ## Database Design
 
 Core entities:
@@ -167,7 +134,7 @@ Core entities:
 - **Field**
 - **FieldUpdate**
 - **Location**
-- (Optional) FieldImage
+- **FieldImage**
 
 Key design principles:
 
@@ -175,8 +142,6 @@ Key design principles:
 - Indexed for performance
 - Append-only updates for auditability
 - Computed status (not stored)
-
----
 
 ## Caching Strategy (Redis)
 
@@ -191,8 +156,6 @@ Cache invalidation occurs when:
 - New field updates are submitted
 - Field assignments change
 
----
-
 ## Background Processing
 
 Using BullMQ (Redis-backed queues) for:
@@ -201,23 +164,17 @@ Using BullMQ (Redis-backed queues) for:
 - Updating cached dashboard data
 - Handling asynchronous tasks
 
----
-
 ## Security & Access Control
 
 - Authentication via Supabase (JWT-based)
 - Role-Based Access Control (RBAC) in backend
 - Row Level Security (RLS) in database for additional protection
 
----
-
 ## File Storage
 
 - Field images stored using Supabase Storage
 - URLs stored in database
 - Upload validation enforced (type, size)
-
----
 
 ## API Documentation
 
