@@ -8,18 +8,18 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as AppRouteImport } from './routes/_app'
+import { Route as rootRouteImport } from './routes/__root.tsx'
+import { Route as LoginRouteImport } from './routes/login.tsx'
+import { Route as AppRouteImport } from './routes/_app.tsx'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AppAgentRouteImport } from './routes/_app.agent'
-import { Route as AppAdminRouteImport } from './routes/_app.admin'
-import { Route as AppFieldsIdRouteImport } from './routes/_app.fields.$id'
-import { Route as AppAgentFieldsRouteImport } from './routes/_app.agent.fields'
-import { Route as AppAgentDashboardRouteImport } from './routes/_app.agent.dashboard'
-import { Route as AppAdminUsersRouteImport } from './routes/_app.admin.users'
-import { Route as AppAdminFieldRouteImport } from './routes/_app.admin.field'
-import { Route as AppAdminDashboardRouteImport } from './routes/_app.admin.dashboard'
+import { Route as AppAgentRouteImport } from './routes/_app.agent.tsx'
+import { Route as AppAdminRouteImport } from './routes/_app.admin.tsx'
+import { Route as AppFieldsIdRouteImport } from './routes/_app.fields.$id.tsx'
+import { Route as AppAgentFieldsRouteImport } from './routes/_app.agent.fields.tsx'
+import { Route as AppAgentDashboardRouteImport } from './routes/_app.agent.dashboard.tsx'
+import { Route as AppAdminUsersRouteImport } from './routes/_app.admin.users.tsx'
+import { Route as AppAdminFieldRouteImport } from './routes/_app.admin.field.tsx'
+import { Route as AppAdminDashboardRouteImport } from './routes/_app.admin.dashboard.tsx'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',

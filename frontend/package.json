@@ -1,5 +1,5 @@
 {
-  "name": "front",
+  "name": "smartseason-frontend",
   "private": true,
   "type": "module",
   "imports": {
