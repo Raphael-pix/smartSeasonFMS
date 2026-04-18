@@ -13,6 +13,7 @@ import { UpdatesModule } from './updates/updates.module';
 import { ImagesModule } from './images/images.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { JobsModule } from './jobs/jobs.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -21,6 +22,14 @@ import { JobsModule } from './jobs/jobs.module';
       load: [configuration],
       envFilePath: '.env',
     }),
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60,
+        limit: 100,
+      },
+    ]),
+
     BullModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
