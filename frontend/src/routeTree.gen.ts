@@ -12,13 +12,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthCompleteProfileRouteImport } from './routes/auth/complete-profile'
 import { Route as AppAgentRouteImport } from './routes/_app.agent'
 import { Route as AppAdminRouteImport } from './routes/_app.admin'
 import { Route as AppFieldsIdRouteImport } from './routes/_app.fields.$id'
 import { Route as AppAgentFieldsRouteImport } from './routes/_app.agent.fields'
 import { Route as AppAgentDashboardRouteImport } from './routes/_app.agent.dashboard'
 import { Route as AppAdminUsersRouteImport } from './routes/_app.admin.users'
-import { Route as AppAdminFieldRouteImport } from './routes/_app.admin.field'
+import { Route as AppAdminFieldsRouteImport } from './routes/_app.admin.fields'
 import { Route as AppAdminDashboardRouteImport } from './routes/_app.admin.dashboard'
 
 const LoginRoute = LoginRouteImport.update({
@@ -33,6 +34,11 @@ const AppRoute = AppRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthCompleteProfileRoute = AuthCompleteProfileRouteImport.update({
+  id: '/auth/complete-profile',
+  path: '/auth/complete-profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppAgentRoute = AppAgentRouteImport.update({
@@ -65,9 +71,9 @@ const AppAdminUsersRoute = AppAdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AppAdminRoute,
 } as any)
-const AppAdminFieldRoute = AppAdminFieldRouteImport.update({
-  id: '/field',
-  path: '/field',
+const AppAdminFieldsRoute = AppAdminFieldsRouteImport.update({
+  id: '/fields',
+  path: '/fields',
   getParentRoute: () => AppAdminRoute,
 } as any)
 const AppAdminDashboardRoute = AppAdminDashboardRouteImport.update({
@@ -81,8 +87,9 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/admin': typeof AppAdminRouteWithChildren
   '/agent': typeof AppAgentRouteWithChildren
+  '/auth/complete-profile': typeof AuthCompleteProfileRoute
   '/admin/dashboard': typeof AppAdminDashboardRoute
-  '/admin/field': typeof AppAdminFieldRoute
+  '/admin/fields': typeof AppAdminFieldsRoute
   '/admin/users': typeof AppAdminUsersRoute
   '/agent/dashboard': typeof AppAgentDashboardRoute
   '/agent/fields': typeof AppAgentFieldsRoute
@@ -93,8 +100,9 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/admin': typeof AppAdminRouteWithChildren
   '/agent': typeof AppAgentRouteWithChildren
+  '/auth/complete-profile': typeof AuthCompleteProfileRoute
   '/admin/dashboard': typeof AppAdminDashboardRoute
-  '/admin/field': typeof AppAdminFieldRoute
+  '/admin/fields': typeof AppAdminFieldsRoute
   '/admin/users': typeof AppAdminUsersRoute
   '/agent/dashboard': typeof AppAgentDashboardRoute
   '/agent/fields': typeof AppAgentFieldsRoute
@@ -107,8 +115,9 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_app/admin': typeof AppAdminRouteWithChildren
   '/_app/agent': typeof AppAgentRouteWithChildren
+  '/auth/complete-profile': typeof AuthCompleteProfileRoute
   '/_app/admin/dashboard': typeof AppAdminDashboardRoute
-  '/_app/admin/field': typeof AppAdminFieldRoute
+  '/_app/admin/fields': typeof AppAdminFieldsRoute
   '/_app/admin/users': typeof AppAdminUsersRoute
   '/_app/agent/dashboard': typeof AppAgentDashboardRoute
   '/_app/agent/fields': typeof AppAgentFieldsRoute
@@ -121,8 +130,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/admin'
     | '/agent'
+    | '/auth/complete-profile'
     | '/admin/dashboard'
-    | '/admin/field'
+    | '/admin/fields'
     | '/admin/users'
     | '/agent/dashboard'
     | '/agent/fields'
@@ -133,8 +143,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/admin'
     | '/agent'
+    | '/auth/complete-profile'
     | '/admin/dashboard'
-    | '/admin/field'
+    | '/admin/fields'
     | '/admin/users'
     | '/agent/dashboard'
     | '/agent/fields'
@@ -146,8 +157,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/_app/admin'
     | '/_app/agent'
+    | '/auth/complete-profile'
     | '/_app/admin/dashboard'
-    | '/_app/admin/field'
+    | '/_app/admin/fields'
     | '/_app/admin/users'
     | '/_app/agent/dashboard'
     | '/_app/agent/fields'
@@ -158,6 +170,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
+  AuthCompleteProfileRoute: typeof AuthCompleteProfileRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -181,6 +194,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/complete-profile': {
+      id: '/auth/complete-profile'
+      path: '/auth/complete-profile'
+      fullPath: '/auth/complete-profile'
+      preLoaderRoute: typeof AuthCompleteProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/agent': {
@@ -225,11 +245,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminUsersRouteImport
       parentRoute: typeof AppAdminRoute
     }
-    '/_app/admin/field': {
-      id: '/_app/admin/field'
-      path: '/field'
-      fullPath: '/admin/field'
-      preLoaderRoute: typeof AppAdminFieldRouteImport
+    '/_app/admin/fields': {
+      id: '/_app/admin/fields'
+      path: '/fields'
+      fullPath: '/admin/fields'
+      preLoaderRoute: typeof AppAdminFieldsRouteImport
       parentRoute: typeof AppAdminRoute
     }
     '/_app/admin/dashboard': {
@@ -244,13 +264,13 @@ declare module '@tanstack/react-router' {
 
 interface AppAdminRouteChildren {
   AppAdminDashboardRoute: typeof AppAdminDashboardRoute
-  AppAdminFieldRoute: typeof AppAdminFieldRoute
+  AppAdminFieldsRoute: typeof AppAdminFieldsRoute
   AppAdminUsersRoute: typeof AppAdminUsersRoute
 }
 
 const AppAdminRouteChildren: AppAdminRouteChildren = {
   AppAdminDashboardRoute: AppAdminDashboardRoute,
-  AppAdminFieldRoute: AppAdminFieldRoute,
+  AppAdminFieldsRoute: AppAdminFieldsRoute,
   AppAdminUsersRoute: AppAdminUsersRoute,
 }
 
@@ -290,6 +310,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
+  AuthCompleteProfileRoute: AuthCompleteProfileRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

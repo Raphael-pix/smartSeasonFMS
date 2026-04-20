@@ -1,4 +1,3 @@
-// src/users/users.controller.ts
 import {
   Body,
   Controller,
@@ -11,6 +10,7 @@ import {
   ForbiddenException,
   HttpCode,
   HttpStatus,
+  Post,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -61,6 +61,13 @@ export class UserController {
   @ApiOperation({ summary: 'Get own profile' })
   getMe(@CurrentUser() user: JwtUser) {
     return this.userService.findById(user.id);
+  }
+
+  @Post('invite')
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Invite a user' })
+  inviteUser(@Body() body: { email: string }) {
+    return this.userService.inviteUser(body.email);
   }
 
   @Get(':id')

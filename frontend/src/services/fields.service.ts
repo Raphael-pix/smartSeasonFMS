@@ -1,57 +1,72 @@
-import { apiClient } from "@/lib/apiClient";
+import { apiClient } from '@/lib/apiClient'
 import type {
   FieldDetail,
   FieldWithStatus,
   PaginatedResponse,
-} from "@/types/api.types";
+} from '@/types/api.types'
 
 export interface FieldsListParams {
-  page?: number;
-  limit?: number;
-  status?: string;
-  stage?: string;
-  county?: string;
-  includeArchived?: boolean;
+  page?: number
+  limit?: number
+  status?: string
+  stage?: string
+  county?: string
+  includeArchived?: boolean
 }
 
 export interface CreateFieldInput {
-  name: string;
-  cropType: string;
-  plantingDate: string;
-  currentStage: "PLANTED" | "GROWING" | "READY" | "HARVESTED";
-  agentId?: string | null;
-  county: string;
-  subCounty?: string | null;
-  ward?: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
-  areaSize?: number | null;
-  description?: string | null;
-  coverImageUrl?: string | null;
+  name: string
+  cropType: string
+  plantingDate: string
+  currentStage: 'PLANTED' | 'GROWING' | 'READY' | 'HARVESTED'
+  agentId?: string | null
+  county: string
+  subCounty?: string | null
+  ward?: string | null
+  latitude?: number | null
+  longitude?: number | null
+  areaSize?: number | null
+  description?: string | null
+  coverImageUrl?: string | null
 }
 
 export const fieldsService = {
   async list(params: FieldsListParams = {}) {
     const { data } = await apiClient.get<PaginatedResponse<FieldWithStatus>>(
-      "/fields",
+      '/fields',
       { params },
-    );
-    return data;
+    )
+    return data
   },
   async get(id: string) {
-    const { data } = await apiClient.get<FieldDetail>(`/fields/${id}`);
-    return data;
+    const { data } = await apiClient.get<FieldDetail>(`/fields/${id}`)
+    return data
   },
   async create(input: CreateFieldInput) {
-    const { data } = await apiClient.post<FieldDetail>("/fields", input);
-    return data;
+    const { data } = await apiClient.post<FieldDetail>('/fields', {
+      name: input.name,
+      cropType: input.cropType,
+      plantingDate: input.plantingDate,
+      currentStage: input.currentStage,
+      description: input.description,
+      areaSize: input.areaSize,
+      agentId: input.agentId,
+      location: {
+        county: input.county,
+        subCounty: input.subCounty,
+        ward: input.ward,
+        latitude: input.latitude,
+        longitude: input.longitude,
+      },
+    })
+    return data
   },
   async update(id: string, input: Partial<CreateFieldInput>) {
-    const { data } = await apiClient.patch<FieldDetail>(`/fields/${id}`, input);
-    return data;
+    const { data } = await apiClient.patch<FieldDetail>(`/fields/${id}`, input)
+    return data
   },
   async archive(id: string) {
-    const { data } = await apiClient.delete<FieldDetail>(`/fields/${id}`);
-    return data;
+    const { data } = await apiClient.delete<FieldDetail>(`/fields/${id}`)
+    return data
   },
-};
+}

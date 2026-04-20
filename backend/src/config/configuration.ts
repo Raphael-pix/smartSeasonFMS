@@ -5,9 +5,14 @@ export const configuration = () => ({
     name: process.env.APP_NAME ?? 'SmartSeason API',
   },
 
+  frontend: {
+    url: process.env.FRONTEND_URL ?? 'http://localhost:3001',
+  },
+
   supabase: {
     url: process.env.SUPABASE_URL!,
     publishableKey: process.env.SUPABASE_PUBLISHABLE_KEY!,
+    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
     jwtSecret: process.env.SUPABASE_JWT_SECRET!,
     storageBucket: process.env.SUPABASE_STORAGE_BUCKET ?? 'field-images',
   },

@@ -39,6 +39,7 @@
     "embla-carousel-react": "^8.6.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.577.0",
+    "p-limit": "^7.3.0",
     "posthog-js": "^1.358.1",
     "radix-ui": "^1.4.3",
     "react": "^19.2.0",

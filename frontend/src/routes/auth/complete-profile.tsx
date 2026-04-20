@@ -1,5 +1,5 @@
-import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -8,34 +8,41 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { supabase, isSupabaseConfigured } from '@/lib/supabase'
-import { useAuthStore } from '@/stores/authStore'
-import { usersService } from '@/services/users.service'
 import { toast } from 'sonner'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { usersService } from '#/services/users.service'
 
 const schema = z.object({
-  email: z.email('Enter a valid email'),
-  password: z.string().min(6, 'At least 6 characters'),
+  fullName: z.string().min(2, 'At least 3 characters'),
+  phone: z
+    .string()
+    .min(10, 'Phone number is too short')
+    .max(15, 'Phone number is too long')
+    .regex(/^(\+254|0)[0-9]{9}$/, 'Invalid phone number')
+    .optional(),
+  password: z.string().min(8, 'At least 8 characters'),
 })
 
 type FormValues = z.infer<typeof schema>
 
-export const Route = createFileRoute('/login')({
-  component: LoginPage,
-  beforeLoad: () => {
-    const { user, role } = useAuthStore.getState()
-    if (user) {
-      const target = role === 'ADMIN' ? '/admin/dashboard' : '/agent/dashboard'
-      throw redirect({ to: target as any })
-    }
-  },
+export const Route = createFileRoute('/auth/complete-profile')({
+  component: UpdateProfilePage,
 })
 
-function LoginPage() {
+function UpdateProfilePage() {
   const navigate = useNavigate()
-  const setUser = useAuthStore((s) => s.setUser)
+  const qc = useQueryClient()
   const [submitting, setSubmitting] = useState(false)
-  const role = useAuthStore((s) => s.role)
-  const user = useAuthStore((s) => s.user)
+
+  const updateUserMutation = useMutation({
+    mutationFn: ({ userId, data }: any) => usersService.update(userId, data),
+    onSuccess: (_, variables) => {
+      qc.invalidateQueries({ queryKey: ['users'] })
+      qc.invalidateQueries({ queryKey: ['users', variables.userId] })
+      qc.invalidateQueries({ queryKey: ['users', 'agents'] })
+      qc.invalidateQueries({ queryKey: ['users', 'me'] })
+    },
+  })
 
   const {
     register,
@@ -43,39 +50,48 @@ function LoginPage() {
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
-  useEffect(() => {
-    if (user) {
-      const target = role === 'ADMIN' ? '/admin/dashboard' : '/agent/dashboard'
-      navigate({ to: target as any })
-    }
-  }, [user, role, navigate])
-
   const onSubmit = async (values: FormValues) => {
     if (!isSupabaseConfigured) {
-      toast.error('Failed to login.Please try again')
+      toast.error('Failed to login. Please try again.')
       return
     }
+
     setSubmitting(true)
+
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: values.email,
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!user) {
+        toast.error('Session expired. Please use the invite link again.')
+        return
+      }
+
+      // 1. Update auth password
+      const { error } = await supabase.auth.updateUser({
         password: values.password,
       })
+
       if (error) throw error
-      const me = await usersService.me()
-      setUser(me)
-      toast.success(`Welcome back, ${me.fullName ?? me.email}`)
-      const target =
-        me.role === 'ADMIN' ? '/admin/dashboard' : '/agent/dashboard'
-      navigate({ to: target as any })
+
+      // 2. Update database profile
+      await updateUserMutation.mutateAsync({
+        userId: user.id,
+        data: {
+          fullName: values.fullName,
+          phone: values.phone,
+        },
+      })
+
+      toast.success('Profile updated. Please sign in.')
+      navigate({ to: '/login' })
     } catch (e) {
-      const msg = 'Sign-in failed. Please try again.'
-      toast.error(msg)
+      toast.error('Failed to update profile. Please try again.')
     } finally {
       setSubmitting(false)
     }
   }
-
   return (
     <div className="grid min-h-screen w-full grid-cols-1 lg:grid-cols-2">
       <div className="relative hidden flex-col justify-between overflow-hidden bg-sidebar p-10 text-sidebar-foreground lg:flex">
@@ -118,30 +134,45 @@ function LoginPage() {
             </span>
           </div>
           <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-            Sign in
+            Complete your profile
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Use the credentials provided by your coordinator.
+            Set your password and details to access the system.
           </p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="fullName">Full Name*</Label>
               <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                placeholder="agent@smartseason.co.ke"
-                {...register('email')}
+                id="fullName"
+                type="text"
+                autoComplete="fullName"
+                placeholder="John Doe"
+                {...register('fullName')}
               />
-              {errors.email && (
+              {errors.fullName && (
                 <p className="text-xs text-destructive">
-                  {errors.email.message}
+                  {errors.fullName.message}
                 </p>
               )}
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                type="tel"
+                autoComplete="phone"
+                placeholder="0712345678"
+                {...register('phone')}
+              />
+              {errors.phone && (
+                <p className="text-xs text-destructive">
+                  {errors.phone.message}
+                </p>
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="password">Password*</Label>
               <Input
                 id="password"
                 type="password"
@@ -162,21 +193,12 @@ function LoginPage() {
             >
               {submitting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing in…
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Updating...
                 </>
               ) : (
-                'Sign in'
+                'Complete Profile'
               )}
             </Button>
-            <button
-              type="button"
-              className="block w-full text-center text-xs text-muted-foreground hover:text-foreground"
-              onClick={() =>
-                toast.info('Contact your coordinator to reset your password.')
-              }
-            >
-              Forgot password?
-            </button>
           </form>
         </div>
       </div>

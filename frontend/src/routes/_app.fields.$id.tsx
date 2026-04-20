@@ -8,6 +8,7 @@ import {
   Ruler,
   Hash,
   Archive,
+  Pen,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -22,6 +23,8 @@ import { formatDate, formatDateTime, timeAgo } from '@/lib/format'
 import { SubmitUpdateForm } from '@/components/fields/SubmitUpdateForm'
 import { ImageGallery } from '@/components/fields/ImageGallery'
 import { toast } from 'sonner'
+import { UpdateFieldDialog } from '#/components/fields/UpdateFieldDialog'
+import { useState } from 'react'
 
 export const Route = createFileRoute('/_app/fields/$id')({
   component: FieldDetailPage,
@@ -31,6 +34,7 @@ function FieldDetailPage() {
   const { id } = useParams({ strict: false })
   const role = useAuthStore((s) => s.role)
   const user = useAuthStore((s) => s.user)
+  const [createOpen, setCreateOpen] = useState(false)
   const { data: field, isLoading, isError } = useFieldDetail(id)
   const { data: updates, isLoading: updatesLoading } = useFieldUpdates(id)
   const archive = useArchiveField()
@@ -61,7 +65,6 @@ function FieldDetailPage() {
         <Skeleton className="h-48 w-full rounded-xl" />
       ) : (
         <>
-          {/* Header */}
           <Card className="overflow-hidden">
             <div className="relative h-40 w-full bg-linear-to-br from-primary-soft to-accent">
               {field.coverImageUrl && (
@@ -86,26 +89,36 @@ function FieldDetailPage() {
                     {field.cropType} · planted {formatDate(field.plantingDate)}
                   </p>
                 </div>
-                {role === 'ADMIN' && !field.isArchived && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={async () => {
-                      try {
-                        await archive.mutateAsync(field.id)
-                        toast.success('Field archived')
-                      } catch (e) {
-                        toast.error(
-                          e instanceof Error ? e.message : 'Archive failed',
-                        )
-                      }
-                    }}
-                  >
-                    <Archive className="h-4 w-4" /> Archive
-                  </Button>
+                {role === 'ADMIN' && (
+                  <div className="flex items-center gap-4 md:gap-8">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCreateOpen(true)}
+                    >
+                      <Pen className="h-4 w-4" /> Edit
+                    </Button>
+                    {!field.isArchived && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                          try {
+                            await archive.mutateAsync(field.id)
+                            toast.success('Field archived')
+                          } catch (e) {
+                            toast.error(
+                              e instanceof Error ? e.message : 'Archive failed',
+                            )
+                          }
+                        }}
+                      >
+                        <Archive className="h-4 w-4" /> Archive
+                      </Button>
+                    )}
+                  </div>
                 )}
               </div>
-
               <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
                 <Stat
                   icon={MapPin}
@@ -146,7 +159,6 @@ function FieldDetailPage() {
                   value={String(field._count.images)}
                 />
               </div>
-
               {field.description && (
                 <p className="rounded-md bg-muted/50 p-3 text-sm text-muted-foreground">
                   {field.description}
@@ -240,6 +252,12 @@ function FieldDetailPage() {
               </Card>
             </TabsContent>
           </Tabs>
+
+          <UpdateFieldDialog
+            field={field}
+            open={createOpen}
+            onOpenChange={setCreateOpen}
+          />
         </>
       )}
     </div>

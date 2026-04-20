@@ -37,7 +37,7 @@ function AdminDashboardPage() {
             Live overview of fields, agents, and recent activity.
           </p>
         </div>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="not-md:w-full flex items-center justify-between gap-2 text-xs text-muted-foreground">
           {dataUpdatedAt > 0 && (
             <span>
               Updated {timeAgo(new Date(dataUpdatedAt).toISOString())}
@@ -63,7 +63,6 @@ function AdminDashboardPage() {
         </div>
       )}
 
-      {/* Summary cards */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => (
@@ -98,7 +97,6 @@ function AdminDashboardPage() {
         )}
       </div>
 
-      {/* Charts */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
@@ -143,7 +141,6 @@ function AdminDashboardPage() {
         </Card>
       </div>
 
-      {/* At-risk + Recent activity */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
@@ -164,7 +161,7 @@ function AdminDashboardPage() {
               </div>
             ) : (data?.atRiskFields.length ?? 0) === 0 ? (
               <div className="px-4 py-10 text-center text-sm text-muted-foreground">
-                No at-risk fields. 🎉
+                No at-risk fields.
               </div>
             ) : (
               <div className="overflow-x-auto">

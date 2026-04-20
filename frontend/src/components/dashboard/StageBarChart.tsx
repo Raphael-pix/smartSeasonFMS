@@ -28,7 +28,7 @@ export function StageBarChart({ data }: { data: Record<CropStage, number> }) {
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={chartData}
-          margin={{ top: 8, right: 8, bottom: 0, left: -16 }}
+          margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
           <XAxis

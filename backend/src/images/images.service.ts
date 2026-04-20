@@ -12,6 +12,8 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { AppConfig } from '@/config/configuration';
 import { FieldsService } from '@/fields/fields.service';
 import { JwtUser } from '@/auth/types/request-user.type';
+import { Readable } from 'stream';
+import { ConfirmUploadDto } from './dto/confirm-upload.dto';
 
 const IMAGE_SELECT = {
   id: true,
@@ -63,9 +65,10 @@ export class ImagesService {
     const ext = this.extFromMime(file.mimetype);
     const storagePath = `fields/${fieldId}/${uuidv4()}.${ext}`;
 
+    const stream = Readable.from(file.buffer);
     const { error: uploadError } = await this.supabase.storage
       .from(this.bucket)
-      .upload(storagePath, file.buffer, {
+      .upload(storagePath, stream, {
         contentType: file.mimetype,
         upsert: false,
       });
@@ -93,6 +96,53 @@ export class ImagesService {
       await this.prisma.field.update({
         where: { id: fieldId },
         data: { coverImageUrl: publicUrl },
+      });
+    }
+
+    return image;
+  }
+
+  async getUploadUrl(fieldId: string, fileName: string, user: JwtUser) {
+    await this.fieldsService.findOne(fieldId, user);
+
+    const path = `fields/${fieldId}/${uuidv4()}-${fileName}`;
+
+    const { data, error } = await this.supabase.storage
+      .from(this.bucket)
+      .createSignedUploadUrl(path);
+
+    if (error) throw new InternalServerErrorException(error.message);
+
+    return {
+      uploadUrl: data.signedUrl,
+      path,
+    };
+  }
+
+  async confirmUpload(fieldId: string, dto: ConfirmUploadDto, user: JwtUser) {
+    if (!dto.path.startsWith(`fields/${fieldId}/`)) {
+      throw new InternalServerErrorException('Invalid file path');
+    }
+
+    const {
+      data: { publicUrl },
+    } = this.supabase.storage.from(this.bucket).getPublicUrl(dto.path);
+
+    const image = await this.prisma.fieldImage.create({
+      data: {
+        fieldId,
+        url: publicUrl,
+        caption: dto.caption ?? null,
+        uploadedById: user.id,
+      },
+    });
+
+    if (dto.setCover) {
+      await this.prisma.field.update({
+        where: { id: fieldId },
+        data: {
+          coverImageUrl: publicUrl,
+        },
       });
     }
 

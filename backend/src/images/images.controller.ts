@@ -1,5 +1,5 @@
-// src/images/images.controller.ts
 import {
+  Body,
   Controller,
   Delete,
   Get,
@@ -30,6 +30,7 @@ import { CurrentUser } from '@/auth/decorators/current-user.decorator';
 import type { JwtUser } from '@/auth/types/request-user.type';
 
 import { ImagesService } from './images.service';
+import { ConfirmUploadDto } from './dto/confirm-upload.dto';
 
 @ApiTags('Images')
 @ApiBearerAuth('supabase-jwt')
@@ -87,6 +88,28 @@ export class ImagesController {
     @CurrentUser() user: JwtUser,
   ) {
     return this.imagesService.findByField(fieldId, user);
+  }
+
+  @Post('upload-url')
+  @ApiOperation({ summary: 'Upload image url' })
+  @ApiParam({ name: 'fieldId', type: String })
+  getUploadUrl(
+    @Param('fieldId') fieldId: string,
+    @Body('fileName') fileName: string,
+    @CurrentUser() user?: JwtUser,
+  ) {
+    return this.imagesService.getUploadUrl(fieldId, fileName, user!);
+  }
+
+  @Post('confirm')
+  @ApiOperation({ summary: 'Confirm image url' })
+  @ApiParam({ name: 'fieldId', type: String })
+  confirmUpload(
+    @Param('fieldId') fieldId: string,
+    @Body() dto: ConfirmUploadDto,
+    @CurrentUser() user?: JwtUser,
+  ) {
+    return this.imagesService.confirmUpload(fieldId, dto, user!);
   }
 
   @Delete(':imageId')

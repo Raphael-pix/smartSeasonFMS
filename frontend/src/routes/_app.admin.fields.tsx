@@ -21,7 +21,7 @@ import { TableRowSkeleton } from '@/components/fields/FieldsSkeleton'
 import { CreateFieldDialog } from '@/components/fields/CreateFieldDialog'
 import { timeAgo } from '@/lib/format'
 
-export const Route = createFileRoute('/_app/admin/field')({
+export const Route = createFileRoute('/_app/admin/fields')({
   component: AdminFieldsPage,
 })
 

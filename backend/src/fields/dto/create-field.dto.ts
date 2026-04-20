@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsDateString,
   IsEnum,
@@ -9,6 +10,7 @@ import {
   IsUUID,
   MaxLength,
   Min,
+  ValidateNested,
 } from 'class-validator';
 import { CropStage } from 'generated/prisma/enums';
 
@@ -82,5 +84,7 @@ export class CreateFieldDto {
   agentId?: string;
 
   @ApiProperty({ type: CreateLocationDto })
+  @ValidateNested()
+  @Type(() => CreateLocationDto)
   location: CreateLocationDto;
 }

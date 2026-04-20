@@ -3,9 +3,12 @@ import {
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Role } from 'generated/prisma/enums';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '@/prisma/prisma.service';
+import { ConfigService } from '@nestjs/config';
+import { AppConfig } from '@/config/configuration';
 
 const USER_SELECT = {
   id: true,
@@ -20,7 +23,17 @@ const USER_SELECT = {
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly supabase: SupabaseClient;
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly config: ConfigService<AppConfig, true>,
+  ) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    this.supabase = createClient(
+      this.config.get('supabase.url', { infer: true }),
+      this.config.get('supabase.serviceRoleKey', { infer: true }),
+    );
+  }
   async findAll(params: { role?: Role; page: number; limit: number }) {
     const { role, page, limit } = params;
     const skip = (page - 1) * limit;
@@ -78,6 +91,19 @@ export class UserService {
       data: { isActive: false },
       select: USER_SELECT,
     });
+  }
+
+  async inviteUser(email: string) {
+    const { data, error } = await this.supabase.auth.admin.inviteUserByEmail(
+      email,
+      {
+        redirectTo: `${this.config.get('frontend.url', { infer: true })}auth/complete-profile`,
+      },
+    );
+
+    if (error) throw error;
+
+    return data;
   }
 
   async findAllAgents() {

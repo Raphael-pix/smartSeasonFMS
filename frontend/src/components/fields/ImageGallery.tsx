@@ -1,65 +1,80 @@
-import { useRef, useState } from "react";
-import { Trash2, Upload, ImagePlus, Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { useRef, useState } from 'react'
+import { Trash2, Upload, ImagePlus, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
+import pLimit from 'p-limit'
 import {
   useDeleteImage,
   useFieldImages,
+  useUploadFieldImage,
   useUploadImage,
-} from "@/hooks/useImages";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useAuthStore } from "@/stores/authStore";
-import { formatDate } from "@/lib/format";
+} from '@/hooks/useImages'
+import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useAuthStore } from '@/stores/authStore'
+import { formatDate } from '@/lib/format'
 
-const MAX_BYTES = 5 * 1024 * 1024;
+const MAX_BYTES = 5 * 1024 * 1024
 
 export function ImageGallery({ fieldId }: { fieldId: string }) {
-  const role = useAuthStore((s) => s.role);
-  const { data, isLoading } = useFieldImages(fieldId);
-  const upload = useUploadImage(fieldId);
-  const remove = useDeleteImage(fieldId);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [dragOver, setDragOver] = useState(false);
+  const role = useAuthStore((s) => s.role)
+  const { data, isLoading } = useFieldImages(fieldId)
+  const upload = useUploadImage(fieldId)
+  const remove = useDeleteImage(fieldId)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [dragOver, setDragOver] = useState(false)
+  const uploadMutation = useUploadFieldImage()
 
   const handleFiles = async (files: FileList | null) => {
-    if (!files) return;
-    for (const file of Array.from(files)) {
-      if (!/^image\/(jpeg|png|webp)$/.test(file.type)) {
-        toast.error(`${file.name}: must be JPEG, PNG, or WebP`);
-        continue;
-      }
-      if (file.size > MAX_BYTES) {
-        toast.error(`${file.name}: exceeds 5MB`);
-        continue;
-      }
-      try {
-        await upload.mutateAsync({ file });
-        toast.success(`Uploaded ${file.name}`);
-      } catch (e) {
-        toast.error(
-          e instanceof Error ? e.message : `Failed to upload ${file.name}`,
-        );
-      }
-    }
-  };
+    if (!files) return
 
+    const limit = pLimit(2)
+
+    const tasks = Array.from(files).map((file) =>
+      limit(async () => {
+        if (!/^image\/(jpeg|png|webp)$/.test(file.type)) {
+          toast.error(`${file.name}: invalid type`)
+          return
+        }
+
+        if (file.size > MAX_BYTES) {
+          toast.error(`${file.name}: exceeds 5MB`)
+          return
+        }
+
+        try {
+          await uploadMutation.mutateAsync({
+            fieldId,
+            file,
+            caption: 'Field observation',
+            setCover: false,
+          })
+
+          toast.success(`Uploaded ${file.name}`)
+        } catch (e) {
+          toast.error(`Failed to upload ${file.name}`)
+        }
+      }),
+    )
+
+    await Promise.all(tasks)
+  }
   return (
     <div className="space-y-3">
       <div
         onDragOver={(e) => {
-          e.preventDefault();
-          setDragOver(true);
+          e.preventDefault()
+          setDragOver(true)
         }}
         onDragLeave={() => setDragOver(false)}
         onDrop={(e) => {
-          e.preventDefault();
-          setDragOver(false);
-          handleFiles(e.dataTransfer.files);
+          e.preventDefault()
+          setDragOver(false)
+          handleFiles(e.dataTransfer.files)
         }}
         className={`flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-6 text-center transition-colors ${
           dragOver
-            ? "border-primary bg-primary-soft"
-            : "border-border bg-muted/30"
+            ? 'border-primary bg-primary-soft'
+            : 'border-border bg-muted/30'
         }`}
       >
         <ImagePlus className="h-7 w-7 text-muted-foreground" />
@@ -108,7 +123,7 @@ export function ImageGallery({ fieldId }: { fieldId: string }) {
             >
               <img
                 src={img.url}
-                alt={img.caption ?? "Field image"}
+                alt={img.caption ?? 'Field image'}
                 loading="lazy"
                 className="aspect-square w-full object-cover"
               />
@@ -119,11 +134,11 @@ export function ImageGallery({ fieldId }: { fieldId: string }) {
                   </p>
                 )}
                 <p className="text-muted-foreground">
-                  {img.uploadedBy?.fullName ?? "—"} ·{" "}
+                  {img.uploadedBy?.fullName ?? '—'} ·{' '}
                   {formatDate(img.createdAt)}
                 </p>
               </div>
-              {role === "ADMIN" && (
+              {role === 'ADMIN' && (
                 <button
                   onClick={() => remove.mutate(img.id)}
                   className="absolute right-1.5 top-1.5 rounded-md bg-black/60 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100"
@@ -137,5 +152,5 @@ export function ImageGallery({ fieldId }: { fieldId: string }) {
         </div>
       )}
     </div>
-  );
+  )
 }

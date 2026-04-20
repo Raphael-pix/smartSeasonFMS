@@ -1,43 +1,46 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { useUsers } from "@/hooks/useUsers";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Pagination } from "@/components/ui/PagerControls";
+import { createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
+import { useUsers } from '@/hooks/useUsers'
+import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Pagination } from '@/components/ui/PagerControls'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { TableRowSkeleton } from "@/components/fields/FieldsSkeleton";
-import { Search, Users as UsersIcon } from "lucide-react";
-import { formatDate } from "@/lib/format";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/select'
+import { TableRowSkeleton } from '@/components/fields/FieldsSkeleton'
+import { Plus, Search, Users as UsersIcon } from 'lucide-react'
+import { formatDate } from '@/lib/format'
+import { cn } from '@/lib/utils'
+import { Button } from '#/components/ui/button'
+import { CreateUserDialog } from '#/components/users/CreateUserDialog'
 
-export const Route = createFileRoute("/_app/admin/users")({
+export const Route = createFileRoute('/_app/admin/users')({
   component: AdminUsersPage,
-});
+})
 
 function AdminUsersPage() {
-  const [page, setPage] = useState(1);
-  const [role, setRole] = useState<string>("all");
-  const [q, setQ] = useState("");
+  const [page, setPage] = useState(1)
+  const [role, setRole] = useState<string>('all')
+  const [createOpen, setCreateOpen] = useState(false)
+  const [q, setQ] = useState('')
   const { data, isLoading, isError } = useUsers({
     page,
-    role: role === "all" ? undefined : role,
-  });
+    role: role === 'all' ? undefined : role,
+  })
 
   const filtered =
     data?.data.filter((u) => {
-      if (!q.trim()) return true;
-      const t = q.toLowerCase();
+      if (!q.trim()) return true
+      const t = q.toLowerCase()
       return (
         u.email.toLowerCase().includes(t) ||
-        (u.fullName ?? "").toLowerCase().includes(t)
-      );
-    }) ?? [];
+        (u.fullName ?? '').toLowerCase().includes(t)
+      )
+    }) ?? []
 
   return (
     <div className="space-y-4">
@@ -62,12 +65,12 @@ function AdminUsersPage() {
                 className="pl-8"
               />
             </div>
-            <div className="md:col-span-3">
+            <div className="flex items-center justify-between gap-4 md:col-span-6">
               <Select
                 value={role}
                 onValueChange={(v) => {
-                  setRole(v);
-                  setPage(1);
+                  setRole(v)
+                  setPage(1)
                 }}
               >
                 <SelectTrigger>
@@ -79,6 +82,11 @@ function AdminUsersPage() {
                   <SelectItem value="AGENT">Agent</SelectItem>
                 </SelectContent>
               </Select>
+
+              <Button onClick={() => setCreateOpen(true)}>
+                <Plus className="w-4 h-4" />
+                Add user
+              </Button>
             </div>
           </div>
 
@@ -124,15 +132,15 @@ function AdminUsersPage() {
                         {u.email}
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">
-                        {u.fullName ?? "—"}
+                        {u.fullName ?? '—'}
                       </td>
                       <td className="px-4 py-3">
                         <span
                           className={cn(
-                            "inline-flex rounded-md px-2 py-0.5 text-xs font-medium",
-                            u.role === "ADMIN"
-                              ? "bg-accent text-accent-foreground"
-                              : "bg-primary-soft text-primary",
+                            'inline-flex rounded-md px-2 py-0.5 text-xs font-medium',
+                            u.role === 'ADMIN'
+                              ? 'bg-accent text-accent-foreground'
+                              : 'bg-primary-soft text-primary',
                           )}
                         >
                           {u.role}
@@ -141,21 +149,21 @@ function AdminUsersPage() {
                       <td className="px-4 py-3">
                         <span
                           className={cn(
-                            "inline-flex items-center gap-1.5 text-xs",
+                            'inline-flex items-center gap-1.5 text-xs',
                             u.isActive
-                              ? "text-success"
-                              : "text-muted-foreground",
+                              ? 'text-success'
+                              : 'text-muted-foreground',
                           )}
                         >
                           <span
                             className={cn(
-                              "h-1.5 w-1.5 rounded-full",
+                              'h-1.5 w-1.5 rounded-full',
                               u.isActive
-                                ? "bg-success"
-                                : "bg-neutral-soft-foreground",
+                                ? 'bg-success'
+                                : 'bg-neutral-soft-foreground',
                             )}
                           />
-                          {u.isActive ? "Active" : "Inactive"}
+                          {u.isActive ? 'Active' : 'Inactive'}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">
@@ -177,6 +185,8 @@ function AdminUsersPage() {
           )}
         </CardContent>
       </Card>
+
+      <CreateUserDialog open={createOpen} onOpenChange={setCreateOpen} />
     </div>
-  );
+  )
 }

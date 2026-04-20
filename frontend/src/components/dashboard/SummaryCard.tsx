@@ -1,33 +1,33 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { Card, CardContent } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
 
 export function SummaryCard({
   label,
   value,
   hint,
   icon: Icon,
-  tone = "default",
+  tone = 'default',
 }: {
-  label: string;
-  value: number | string;
-  hint?: string;
-  icon: React.ComponentType<{ className?: string }>;
-  tone?: "default" | "success" | "warning" | "muted";
+  label: string
+  value: number | string
+  hint?: string
+  icon: React.ComponentType<{ className?: string }>
+  tone?: 'default' | 'success' | 'warning' | 'muted'
 }) {
   const toneCls =
-    tone === "success"
-      ? "bg-success-soft text-success"
-      : tone === "warning"
-        ? "bg-warning-soft text-warning-foreground"
-        : tone === "muted"
-          ? "bg-neutral-soft text-neutral-soft-foreground"
-          : "bg-primary-soft text-primary";
+    tone === 'success'
+      ? 'bg-success-soft text-success'
+      : tone === 'warning'
+        ? 'bg-warning-soft text-warning-foreground'
+        : tone === 'muted'
+          ? 'bg-neutral-soft text-neutral-soft-foreground'
+          : 'bg-primary-soft text-primary'
   return (
     <Card>
-      <CardContent className="flex items-center gap-4 p-4">
+      <CardContent className="flex items-center  gap-4 p-4">
         <div
           className={cn(
-            "flex h-11 w-11 shrink-0 items-center justify-center rounded-lg",
+            'flex h-11 w-11 shrink-0 items-center justify-center rounded-lg',
             toneCls,
           )}
         >
@@ -44,5 +44,5 @@ export function SummaryCard({
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }
