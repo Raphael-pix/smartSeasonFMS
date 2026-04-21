@@ -7,13 +7,13 @@
   },
   "scripts": {
     "dev": "dotenv -e .env.local -- sh -c \"NODE_OPTIONS='--import ./instrument.server.mjs' vite dev --port 3000\"",
-    "build": "vite build && cp instrument.server.mjs .output/server",
+    "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "lint": "eslint",
     "format": "prettier --check .",
     "check": "prettier --write . && eslint --fix",
-    "start": "node --import ./.output/server/instrument.server.mjs .output/server/index.mjs"
+    "start": "node .output/server/index.mjs"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.8",
@@ -39,6 +39,7 @@
     "embla-carousel-react": "^8.6.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.577.0",
+    "nitro": "^3.0.260415-beta",
     "p-limit": "^7.3.0",
     "posthog-js": "^1.358.1",
     "radix-ui": "^1.4.3",
