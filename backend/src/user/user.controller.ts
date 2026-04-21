@@ -46,21 +46,27 @@ export class UserController {
     @Query('role') role?: Role,
     @Query('page') page = 1,
     @Query('limit') limit = 20,
+    @CurrentUser() user?: JwtUser,
   ) {
-    return this.userService.findAll({ role, page: +page, limit: +limit });
+    return this.userService.findAll({
+      role,
+      page: +page,
+      limit: +limit,
+      requestingUser: user!,
+    });
   }
 
   @Get('agents')
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'List all active agents [Admin]' })
-  findAgents() {
-    return this.userService.findAllAgents();
+  findAgents(@CurrentUser() user: JwtUser) {
+    return this.userService.findAllAgents(user);
   }
 
   @Get('me')
   @ApiOperation({ summary: 'Get own profile' })
   getMe(@CurrentUser() user: JwtUser) {
-    return this.userService.findById(user.id);
+    return this.userService.findById(user.id, user);
   }
 
   @Post('invite')
@@ -79,7 +85,7 @@ export class UserController {
     if (user.role !== Role.ADMIN && user.id !== id) {
       throw new ForbiddenException('You can only view your own profile');
     }
-    return this.userService.findById(id);
+    return this.userService.findById(id, user);
   }
 
   @Patch(':id')
@@ -98,6 +104,6 @@ export class UserController {
       delete dto.isActive;
     }
 
-    return this.userService.update(id, dto);
+    return this.userService.update(id, dto, user);
   }
 }

@@ -17,7 +17,7 @@ export class CacheService {
     return `${NS}:field:list:${scope}`;
   }
 
-  dashboardKey(scope: 'admin' | `agent:${string}`) {
+  dashboardKey(scope: `admin:${string}` | `agent:${string}`) {
     return `${NS}:dashboard:${scope}`;
   }
 

@@ -29,23 +29,51 @@ export class DashboardProcessor {
   async refreshAdmin() {
     this.logger.log('Refreshing admin dashboard cache');
 
-    const data = await this.dashboardService.buildAdminDashboard();
-    const ttl = this.config.get('cache.ttlDashboard', { infer: true });
-    await this.cache.set(this.cache.dashboardKey('admin'), data, ttl);
+    const farms = await this.prisma.farm.findMany({
+      where: {
+        isActive: true,
+        users: { some: { role: Role.ADMIN, isActive: true } },
+      },
+    });
 
-    this.logger.log('Admin dashboard cache refreshed');
-    return { refreshed: true };
+    const ttl = this.config.get('cache.ttlDashboard', { infer: true });
+    let refreshed = 0;
+
+    for (const farm of farms) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const fakeAdminCtx = { farmId: farm.id } as any;
+        const data =
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+          await this.dashboardService.buildAdminDashboard(fakeAdminCtx);
+        await this.cache.set(
+          this.cache.dashboardKey(`admin:${farm.id}`),
+          data,
+          ttl,
+        );
+        refreshed++;
+      } catch (err) {
+        this.logger.warn(
+          `Failed to refresh admin dashboard for farm ${farm.id}: ${err}`,
+        );
+      }
+    }
+
+    this.logger.log(
+      `Admin dashboard caches refreshed: ${refreshed}/${farms.length} farms`,
+    );
+    return { refreshed, total: farms.length };
   }
 
   @Process(JOB_REFRESH_AGENT_DASHBOARD)
   async refreshAgentDashboards() {
     this.logger.log('Refreshing agent dashboard caches');
 
-    // Load all active agents who have at least one assigned field
     const agents = await this.prisma.user.findMany({
       where: {
         role: Role.AGENT,
         isActive: true,
+        farmId: { not: null },
         assignedFields: { some: { isArchived: false } },
       },
       select: {
@@ -54,6 +82,7 @@ export class DashboardProcessor {
         role: true,
         fullName: true,
         isActive: true,
+        farmId: true,
       },
     });
 
@@ -62,7 +91,10 @@ export class DashboardProcessor {
 
     for (const agent of agents) {
       try {
-        const data = await this.dashboardService.buildAgentDashboard(agent);
+        const data = await this.dashboardService.buildAgentDashboard({
+          ...agent,
+          farmId: agent.farmId!,
+        });
         await this.cache.set(
           this.cache.dashboardKey(`agent:${agent.id}`),
           data,

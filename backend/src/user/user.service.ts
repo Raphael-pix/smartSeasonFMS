@@ -9,6 +9,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '@/prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { AppConfig } from '@/config/configuration';
+import { JwtUser } from '@/auth/types/request-user.type';
 
 const USER_SELECT = {
   id: true,
@@ -34,11 +35,16 @@ export class UserService {
       this.config.get('supabase.serviceRoleKey', { infer: true }),
     );
   }
-  async findAll(params: { role?: Role; page: number; limit: number }) {
-    const { role, page, limit } = params;
+  async findAll(params: {
+    role?: Role;
+    page: number;
+    limit: number;
+    requestingUser: JwtUser;
+  }) {
+    const { role, page, limit, requestingUser } = params;
     const skip = (page - 1) * limit;
 
-    const where = { ...(role ? { role } : {}) };
+    const where = { farmId: requestingUser.farmId, ...(role ? { role } : {}) };
 
     const [users, total] = await this.prisma.$transaction(async (prisma) => {
       const users = await prisma.user.findMany({
@@ -58,9 +64,9 @@ export class UserService {
     };
   }
 
-  async findById(id: string) {
+  async findById(id: string, requestingUser: JwtUser) {
     const user = await this.prisma.user.findUnique({
-      where: { id },
+      where: { id, farmId: requestingUser.id },
       select: USER_SELECT,
     });
 
@@ -68,8 +74,8 @@ export class UserService {
     return user;
   }
 
-  async update(id: string, dto: UpdateUserDto) {
-    await this.findById(id);
+  async update(id: string, dto: UpdateUserDto, requestingUser: JwtUser) {
+    await this.findById(id, requestingUser);
 
     return this.prisma.user.update({
       where: { id },
@@ -83,8 +89,8 @@ export class UserService {
     });
   }
 
-  async deactivate(id: string) {
-    await this.findById(id);
+  async deactivate(id: string, requestingUser: JwtUser) {
+    await this.findById(id, requestingUser);
 
     return this.prisma.user.update({
       where: { id },
@@ -106,24 +112,26 @@ export class UserService {
     return data;
   }
 
-  async findAllAgents() {
+  async findAllAgents(requestingUser: JwtUser) {
     return this.prisma.user.findMany({
-      where: { role: Role.AGENT, isActive: true },
+      where: {
+        role: Role.AGENT,
+        isActive: true,
+        farmId: requestingUser.farmId,
+      },
       select: { id: true, fullName: true, email: true },
       orderBy: { fullName: 'asc' },
     });
   }
 
-  async validateAgent(agentId: string): Promise<void> {
+  async validateAgent(agentId: string, farmId: string): Promise<void> {
     const agent = await this.prisma.user.findUnique({
-      where: { id: agentId },
+      where: { id: agentId, farmId, isActive: true },
       select: { id: true, role: true, isActive: true },
     });
 
     if (!agent) throw new NotFoundException(`Agent ${agentId} not found`);
     if (agent.role !== Role.AGENT)
       throw new ConflictException(`User ${agentId} is not an AGENT`);
-    if (!agent.isActive)
-      throw new ConflictException(`Agent ${agentId} is deactivated`);
   }
 }

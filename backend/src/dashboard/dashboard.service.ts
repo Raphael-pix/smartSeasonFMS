@@ -23,15 +23,15 @@ export class DashboardService {
     private readonly config: ConfigService<AppConfig, true>,
   ) {}
 
-  async getAdminDashboard() {
-    const cacheKey = this.cache.dashboardKey('admin');
+  async getAdminDashboard(user: JwtUser) {
+    const cacheKey = this.cache.dashboardKey(`admin:${user.farmId}`);
     const cached = await this.cache.get(cacheKey);
     if (cached) {
       this.logger.debug('Admin dashboard served from cache');
       return cached;
     }
 
-    const data = await this.buildAdminDashboard();
+    const data = await this.buildAdminDashboard(user);
 
     await this.cache.set(
       cacheKey,
@@ -42,7 +42,7 @@ export class DashboardService {
     return data;
   }
 
-  async buildAdminDashboard() {
+  async buildAdminDashboard(user: JwtUser) {
     const [
       totalFields,
       statusCounts,
@@ -53,16 +53,17 @@ export class DashboardService {
     ] = await Promise.all([
       this.prisma.field.count({ where: { isArchived: false } }),
 
-      this.fieldsService.countByStatus(),
+      this.fieldsService.countByStatus(user.farmId),
 
-      this.updatesService.findRecent(10),
+      this.updatesService.findRecent(user.farmId, 10),
 
-      this.getAtRiskFields(),
+      this.getAtRiskFields(user.farmId),
 
-      this.getStageBreakdown(),
+      this.getStageBreakdown(user.farmId),
 
       this.prisma.user.count({
         where: {
+          farmId: user.farmId,
           role: Role.AGENT,
           isActive: true,
           assignedFields: { some: { isArchived: false } },
@@ -110,7 +111,7 @@ export class DashboardService {
 
     const [assignedFields, recentUpdates] = await Promise.all([
       this.prisma.field.findMany({
-        where: { agentId, isArchived: false },
+        where: { farmId: user.farmId, agentId, isArchived: false },
         select: {
           id: true,
           name: true,
@@ -169,7 +170,7 @@ export class DashboardService {
     };
   }
 
-  private async getAtRiskFields() {
+  private async getAtRiskFields(farmId: string) {
     const threshold = this.config.get('fieldStatus.atRiskThresholdDays', {
       infer: true,
     });
@@ -177,6 +178,7 @@ export class DashboardService {
 
     return this.prisma.field.findMany({
       where: {
+        farmId,
         isArchived: false,
         currentStage: { not: CropStage.HARVESTED },
         OR: [{ lastUpdatedAt: null }, { lastUpdatedAt: { lt: cutoff } }],
@@ -196,10 +198,12 @@ export class DashboardService {
     });
   }
 
-  private async getStageBreakdown(): Promise<Record<CropStage, number>> {
+  private async getStageBreakdown(
+    farmId: string,
+  ): Promise<Record<CropStage, number>> {
     const counts = await this.prisma.field.groupBy({
       by: ['currentStage'],
-      where: { isArchived: false },
+      where: { farmId, isArchived: false },
       _count: { id: true },
     });
 

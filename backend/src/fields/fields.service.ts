@@ -108,36 +108,39 @@ export class FieldsService {
     return status;
   }
 
-  async create(dto: CreateFieldDto, JwtUser: JwtUser) {
+  async create(dto: CreateFieldDto, user: JwtUser) {
     if (dto.agentId) {
-      await this.userService.validateAgent(dto.agentId);
+      await this.userService.validateAgent(dto.agentId, user.farmId);
     }
 
-    const field = await this.prisma.field.create({
-      data: {
-        name: dto.name,
-        cropType: dto.cropType,
-        plantingDate: new Date(dto.plantingDate),
-        currentStage: dto.currentStage ?? CropStage.PLANTED,
-        description: dto.description,
-        areaSize: dto.areaSize,
-        agent: dto.agentId ? { connect: { id: dto.agentId } } : undefined,
-
-        updatedBy: {
-          connect: { id: JwtUser.id },
+    const field = await this.prisma.$transaction(async (prisma) => {
+      const location = await prisma.location.create({
+        data: {
+          county: dto.location.county,
+          subCounty: dto.location.subCounty ?? null,
+          ward: dto.location.ward ?? null,
+          latitude: dto.location.latitude ?? null,
+          longitude: dto.location.longitude ?? null,
         },
+      });
 
-        location: {
-          create: {
-            county: dto.location.county,
-            subCounty: dto.location.subCounty,
-            ward: dto.location.ward,
-            latitude: dto.location.latitude,
-            longitude: dto.location.longitude,
-          },
+      const field = await prisma.field.create({
+        data: {
+          name: dto.name,
+          cropType: dto.cropType,
+          plantingDate: new Date(dto.plantingDate),
+          currentStage: dto.currentStage ?? CropStage.PLANTED,
+          description: dto.description,
+          areaSize: dto.areaSize,
+          farmId: user.farmId,
+          agentId: dto.agentId ?? null,
+          updatedById: user.id,
+          locationId: location.id,
         },
-      },
-      select: FIELD_DETAIL_SELECT,
+        select: FIELD_DETAIL_SELECT,
+      });
+
+      return field;
     });
 
     await this.cache.invalidateFieldLists();
@@ -150,6 +153,7 @@ export class FieldsService {
     const isAdmin = user.role === Role.ADMIN;
 
     const where: Prisma.FieldWhereInput = {
+      farmId: user.farmId,
       ...(!isAdmin && { agentId: user.id }),
       ...(!includeArchived && { isArchived: false }),
       ...(stage && { currentStage: stage }),
@@ -188,7 +192,7 @@ export class FieldsService {
 
   async findOne(id: string, user: JwtUser) {
     const field = await this.prisma.field.findUnique({
-      where: { id },
+      where: { id, farmId: user.farmId },
       select: FIELD_DETAIL_SELECT,
     });
 
@@ -201,11 +205,11 @@ export class FieldsService {
     return this.attachStatus(field);
   }
 
-  async update(id: string, dto: UpdateFieldDto, JwtUser: JwtUser) {
-    await this.findOne(id, JwtUser);
+  async update(id: string, dto: UpdateFieldDto, user: JwtUser) {
+    await this.findOne(id, user);
 
     if (dto.agentId) {
-      await this.userService.validateAgent(dto.agentId);
+      await this.userService.validateAgent(dto.agentId, user.farmId);
     }
 
     const updated = await this.prisma.field.update({
@@ -219,7 +223,7 @@ export class FieldsService {
         ...(dto.description !== undefined && { description: dto.description }),
         ...(dto.areaSize !== undefined && { areaSize: dto.areaSize }),
         ...(dto.agentId !== undefined && { agentId: dto.agentId }),
-        updatedById: JwtUser.id,
+        updatedById: user.id,
       },
       select: FIELD_DETAIL_SELECT,
     });
@@ -269,9 +273,9 @@ export class FieldsService {
     });
   }
 
-  async countByStatus(): Promise<Record<FieldStatus, number>> {
+  async countByStatus(farmId: string): Promise<Record<FieldStatus, number>> {
     const fields = await this.prisma.field.findMany({
-      where: { isArchived: false },
+      where: { farmId, isArchived: false },
       select: {
         id: true,
         currentStage: true,

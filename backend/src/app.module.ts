@@ -14,6 +14,7 @@ import { ImagesModule } from './images/images.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { JobsModule } from './jobs/jobs.module';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { FarmsModule } from './farms/farms.module';
 
 @Module({
   imports: [
@@ -22,7 +23,6 @@ import { ThrottlerModule } from '@nestjs/throttler';
       load: [configuration],
       envFilePath: '.env',
     }),
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     ThrottlerModule.forRoot([
       {
         ttl: 60,
@@ -50,6 +50,8 @@ import { ThrottlerModule } from '@nestjs/throttler';
     PrismaModule,
 
     AuthModule,
+
+    FarmsModule,
 
     UserModule,
 

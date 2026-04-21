@@ -107,10 +107,13 @@ export class UpdatesService {
     return update;
   }
 
-  async findRecent(limit = 10) {
+  async findRecent(farmId: string, limit = 10) {
     return this.prisma.fieldUpdate.findMany({
       take: limit,
       orderBy: { observedAt: 'desc' },
+      where: {
+        field: { farmId },
+      },
       select: {
         ...UPDATE_SELECT,
         field: { select: { id: true, name: true, cropType: true } },

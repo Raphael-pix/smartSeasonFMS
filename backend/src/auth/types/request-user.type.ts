@@ -6,6 +6,7 @@ export interface JwtUser {
   role: Role;
   isActive: boolean;
   fullName: string | null;
+  farmId: string;
 }
 
 export interface UserRequest extends Request {
@@ -18,5 +19,6 @@ export interface JwtPayload {
   role: Role;
   isActive: boolean;
   fullName: string | null;
+  farmId: string;
   aud?: string;
 }

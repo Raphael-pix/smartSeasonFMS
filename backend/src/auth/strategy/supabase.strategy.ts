@@ -35,6 +35,7 @@ export class SupabaseStrategy extends PassportStrategy(Strategy, 'supabase') {
       role: payload.role,
       isActive: payload.isActive,
       fullName: payload.fullName,
+      farmId: payload.farmId,
     };
   }
 }

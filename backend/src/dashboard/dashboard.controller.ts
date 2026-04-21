@@ -25,8 +25,8 @@ export class DashboardController {
       'Returns total fields, status breakdown, at-risk fields, recent updates, ' +
       'and stage distribution. Response is cached in Redis (TTL: 2 min).',
   })
-  getAdminDashboard() {
-    return this.dashboardService.getAdminDashboard();
+  getAdminDashboard(@CurrentUser() user: JwtUser) {
+    return this.dashboardService.getAdminDashboard(user);
   }
 
   @Get('agent')
