@@ -2,7 +2,6 @@
 
 A backend API for monitoring agricultural fields across farms. Built for coordinators and field workers, with farm-level data isolation, offline-first data capture, and low-bandwidth optimization.
 
----
 
 ## Overview
 
@@ -14,7 +13,6 @@ SmartSeason manages agricultural fields across independent farms. Two roles exis
 
 Every request is scoped to a `farmId`. Cross-farm access is never allowed.
 
----
 
 ## Tech Stack
 
@@ -28,7 +26,6 @@ Every request is scoped to a `farmId`. Cross-farm access is never allowed.
 | Caching         | Redis                   |
 | Background Jobs | BullMQ                  |
 
----
 
 ## Setup
 
@@ -63,7 +60,6 @@ npx prisma migrate dev --name init
 npm run start:dev
 ```
 
----
 
 ## Environment Variables
 
@@ -87,7 +83,6 @@ npm run start:dev
 | `MAX_FILE_SIZE_MB`          | Max image upload size                   | `5`                               |
 | `ALLOWED_MIME_TYPES`        | Allowed image MIME types                | `image/jpeg,image/png,image/webp` |
 
----
 
 ## API Docs
 
