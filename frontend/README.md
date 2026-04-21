@@ -4,7 +4,6 @@ A lightweight, mobile-first field monitoring platform for agricultural coordinat
 
 > **Frontend repository.** This app talks to a separate NestJS backend that handles authentication (via Supabase), multi-tenant farm isolation, and all data persistence.
 
----
 
 ## ✨ Features
 
@@ -38,7 +37,6 @@ A lightweight, mobile-first field monitoring platform for agricultural coordinat
 - Online/offline indicator in the top bar
 - Queued submissions surface as a "queued" badge until they sync
 
----
 
 ## 🛠 Tech Stack
 
@@ -51,7 +49,6 @@ A lightweight, mobile-first field monitoring platform for agricultural coordinat
 - **Auth**: Supabase JS SDK (tokens forwarded to NestJS API)
 - **Forms**: React Hook Form + Zod
 
----
 
 ## 📁 Project Structure
 
@@ -77,7 +74,6 @@ src/
 └── styles.css           # Tailwind v4 tokens (oklch theme)
 ```
 
----
 
 ## 🚀 Getting Started
 
@@ -117,7 +113,6 @@ The app will be available at `http://localhost:3000` (or whichever port Vite pic
 npm run build
 ```
 
----
 
 ## 🔐 Authentication & Onboarding Flow
 
@@ -130,7 +125,6 @@ npm run build
 
 The app's `_app` layout redirects users without a `farmId` to `/onboarding` automatically.
 
----
 
 ## 🎨 Design System
 
@@ -139,7 +133,6 @@ The app's `_app` layout redirects users without a `farmId` to `/onboarding` auto
 - Dark mode toggled via `.dark` class on `<html>` (managed by `ThemeProvider`)
 - **Never** hardcode colors in components — always use Tailwind classes that map to tokens
 
----
 
 ## 📡 API Contract
 
@@ -157,7 +150,6 @@ All endpoints are documented by the NestJS backend. Key modules consumed here:
 
 The Axios client (`src/lib/apiClient.ts`) auto-attaches the Supabase access token and refreshes on 401.
 
----
 
 ## ⚡ Performance Notes
 
@@ -167,4 +159,3 @@ The Axios client (`src/lib/apiClient.ts`) auto-attaches the Supabase access toke
 - Data Saver mode reduces image fidelity
 - Mobile-first layouts; desktop is a progressive enhancement
 
----
