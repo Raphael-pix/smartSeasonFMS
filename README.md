@@ -130,6 +130,7 @@ The system is designed with rural usage in mind:
 
 Core entities:
 
+-**Farm**
 - **User**
 - **Field**
 - **FieldUpdate**
@@ -176,6 +177,3 @@ Using BullMQ (Redis-backed queues) for:
 - URLs stored in database
 - Upload validation enforced (type, size)
 
-## API Documentation
-
-- Swagger documentation available via:
