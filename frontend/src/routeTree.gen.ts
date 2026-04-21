@@ -9,10 +9,14 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthCompleteProfileRouteImport } from './routes/auth/complete-profile'
+import { Route as AppProfileRouteImport } from './routes/_app.profile'
+import { Route as AppFarmRouteImport } from './routes/_app.farm'
 import { Route as AppAgentRouteImport } from './routes/_app.agent'
 import { Route as AppAdminRouteImport } from './routes/_app.admin'
 import { Route as AppFieldsIdRouteImport } from './routes/_app.fields.$id'
@@ -22,6 +26,16 @@ import { Route as AppAdminUsersRouteImport } from './routes/_app.admin.users'
 import { Route as AppAdminFieldsRouteImport } from './routes/_app.admin.fields'
 import { Route as AppAdminDashboardRouteImport } from './routes/_app.admin.dashboard'
 
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -40,6 +54,16 @@ const AuthCompleteProfileRoute = AuthCompleteProfileRouteImport.update({
   id: '/auth/complete-profile',
   path: '/auth/complete-profile',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFarmRoute = AppFarmRouteImport.update({
+  id: '/farm',
+  path: '/farm',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppAgentRoute = AppAgentRouteImport.update({
   id: '/agent',
@@ -85,8 +109,12 @@ const AppAdminDashboardRoute = AppAdminDashboardRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
+  '/signup': typeof SignupRoute
   '/admin': typeof AppAdminRouteWithChildren
   '/agent': typeof AppAgentRouteWithChildren
+  '/farm': typeof AppFarmRoute
+  '/profile': typeof AppProfileRoute
   '/auth/complete-profile': typeof AuthCompleteProfileRoute
   '/admin/dashboard': typeof AppAdminDashboardRoute
   '/admin/fields': typeof AppAdminFieldsRoute
@@ -98,8 +126,12 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
+  '/signup': typeof SignupRoute
   '/admin': typeof AppAdminRouteWithChildren
   '/agent': typeof AppAgentRouteWithChildren
+  '/farm': typeof AppFarmRoute
+  '/profile': typeof AppProfileRoute
   '/auth/complete-profile': typeof AuthCompleteProfileRoute
   '/admin/dashboard': typeof AppAdminDashboardRoute
   '/admin/fields': typeof AppAdminFieldsRoute
@@ -113,8 +145,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
+  '/signup': typeof SignupRoute
   '/_app/admin': typeof AppAdminRouteWithChildren
   '/_app/agent': typeof AppAgentRouteWithChildren
+  '/_app/farm': typeof AppFarmRoute
+  '/_app/profile': typeof AppProfileRoute
   '/auth/complete-profile': typeof AuthCompleteProfileRoute
   '/_app/admin/dashboard': typeof AppAdminDashboardRoute
   '/_app/admin/fields': typeof AppAdminFieldsRoute
@@ -128,8 +164,12 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/onboarding'
+    | '/signup'
     | '/admin'
     | '/agent'
+    | '/farm'
+    | '/profile'
     | '/auth/complete-profile'
     | '/admin/dashboard'
     | '/admin/fields'
@@ -141,8 +181,12 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/onboarding'
+    | '/signup'
     | '/admin'
     | '/agent'
+    | '/farm'
+    | '/profile'
     | '/auth/complete-profile'
     | '/admin/dashboard'
     | '/admin/fields'
@@ -155,8 +199,12 @@ export interface FileRouteTypes {
     | '/'
     | '/_app'
     | '/login'
+    | '/onboarding'
+    | '/signup'
     | '/_app/admin'
     | '/_app/agent'
+    | '/_app/farm'
+    | '/_app/profile'
     | '/auth/complete-profile'
     | '/_app/admin/dashboard'
     | '/_app/admin/fields'
@@ -170,11 +218,27 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
+  OnboardingRoute: typeof OnboardingRoute
+  SignupRoute: typeof SignupRoute
   AuthCompleteProfileRoute: typeof AuthCompleteProfileRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -202,6 +266,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/complete-profile'
       preLoaderRoute: typeof AuthCompleteProfileRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/profile': {
+      id: '/_app/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/farm': {
+      id: '/_app/farm'
+      path: '/farm'
+      fullPath: '/farm'
+      preLoaderRoute: typeof AppFarmRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/agent': {
       id: '/_app/agent'
@@ -295,12 +373,16 @@ const AppAgentRouteWithChildren = AppAgentRoute._addFileChildren(
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRouteWithChildren
   AppAgentRoute: typeof AppAgentRouteWithChildren
+  AppFarmRoute: typeof AppFarmRoute
+  AppProfileRoute: typeof AppProfileRoute
   AppFieldsIdRoute: typeof AppFieldsIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppAdminRoute: AppAdminRouteWithChildren,
   AppAgentRoute: AppAgentRouteWithChildren,
+  AppFarmRoute: AppFarmRoute,
+  AppProfileRoute: AppProfileRoute,
   AppFieldsIdRoute: AppFieldsIdRoute,
 }
 
@@ -310,6 +392,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
+  OnboardingRoute: OnboardingRoute,
+  SignupRoute: SignupRoute,
   AuthCompleteProfileRoute: AuthCompleteProfileRoute,
 }
 export const routeTree = rootRouteImport

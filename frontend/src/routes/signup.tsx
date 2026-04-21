@@ -1,49 +1,46 @@
 import {
   createFileRoute,
+  Link,
   redirect,
   useNavigate,
-  Link,
 } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Sprout, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 import { usersService } from '@/services/users.service'
-import { toast } from 'sonner'
 
 const schema = z.object({
+  fullName: z.string().min(2, 'Enter your full name'),
   email: z.email('Enter a valid email'),
   password: z.string().min(6, 'At least 6 characters'),
 })
-
 type FormValues = z.infer<typeof schema>
 
-export const Route = createFileRoute('/login')({
-  component: LoginPage,
+export const Route = createFileRoute('/signup')({
   beforeLoad: () => {
     const { user, role } = useAuthStore.getState()
     if (user) {
-      if (!user.farmId) {
-        throw redirect({ to: '/onboarding' })
-      }
-      const target = role === 'ADMIN' ? '/admin/dashboard' : '/agent/dashboard'
-      throw redirect({ to: target })
+      if (!user.farmId) throw redirect({ to: '/onboarding' })
+      throw redirect({
+        to: role === 'ADMIN' ? '/admin/dashboard' : '/agent/dashboard',
+      })
     }
   },
+  component: SignupPage,
 })
 
-function LoginPage() {
+function SignupPage() {
   const navigate = useNavigate()
   const setUser = useAuthStore((s) => s.setUser)
   const [submitting, setSubmitting] = useState(false)
-  const role = useAuthStore((s) => s.role)
-  const user = useAuthStore((s) => s.user)
 
   const {
     register,
@@ -51,41 +48,37 @@ function LoginPage() {
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
-  useEffect(() => {
-    if (user) {
-      if (!user.farmId) {
-        navigate({ to: '/onboarding' })
-        return
-      }
-      const target = role === 'ADMIN' ? '/admin/dashboard' : '/agent/dashboard'
-      navigate({ to: target })
-    }
-  }, [user, role, navigate])
-
   const onSubmit = async (values: FormValues) => {
     if (!isSupabaseConfigured) {
-      toast.error('Failed to login.Please try again')
+      toast.error('Supabase is not configured. Add VITE_SUPABASE_* to .env.')
       return
     }
     setSubmitting(true)
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/onboarding`,
+          data: { full_name: values.fullName },
+        },
       })
       if (error) throw error
-      const me = await usersService.me()
-      setUser(me)
-      toast.success(`Welcome back, ${me.fullName ?? me.email}`)
-      if (!me.farmId) {
+
+      if (data.session) {
+        try {
+          const me = await usersService.me()
+          setUser(me)
+        } catch {}
+        toast.success("Account created. Let's get you set up.")
         navigate({ to: '/onboarding' })
       } else {
-        const target =
-          me.role === 'ADMIN' ? '/admin/dashboard' : '/agent/dashboard'
-        navigate({ to: target })
+        toast.success('Check your email to confirm your account.')
+        navigate({ to: '/login' })
       }
     } catch (e) {
-      const msg = 'Sign-in failed. Please try again.'
+      const msg =
+        e instanceof Error ? e.message : 'Sign-up failed. Please try again.'
       toast.error(msg)
     } finally {
       setSubmitting(false)
@@ -105,13 +98,12 @@ function LoginPage() {
         </div>
         <div className="space-y-4">
           <h1 className="text-3xl font-semibold leading-tight">
-            Coordinate fields. <br />
-            Empower agents. <br />
-            Grow more, season after season.
+            Start tracking your fields <br />
+            in minutes.
           </h1>
           <p className="max-w-md text-sm text-sidebar-foreground/80">
-            A lightweight monitoring platform built for rural Kenya — fast on
-            low-end phones, resilient on patchy networks.
+            Create an account, then either start a new farm or join an existing
+            one with an invite code.
           </p>
         </div>
         <div className="text-xs text-sidebar-foreground/60">
@@ -134,20 +126,35 @@ function LoginPage() {
             </span>
           </div>
           <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-            Sign in
+            Create your account
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Use the credentials provided by your coordinator.
+            You'll set up or join a farm right after.
           </p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="fullName">Full name</Label>
+              <Input
+                id="fullName"
+                type="text"
+                autoComplete="name"
+                placeholder="Jane Wanjiku"
+                {...register('fullName')}
+              />
+              {errors.fullName && (
+                <p className="text-xs text-destructive">
+                  {errors.fullName.message}
+                </p>
+              )}
+            </div>
             <div className="space-y-1.5">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
                 autoComplete="email"
-                placeholder="agent@smartseason.co.ke"
+                placeholder="you@smartseason.co.ke"
                 {...register('email')}
               />
               {errors.email && (
@@ -161,8 +168,8 @@ function LoginPage() {
               <Input
                 id="password"
                 type="password"
-                autoComplete="current-password"
-                placeholder="••••••••"
+                autoComplete="new-password"
+                placeholder="At least 6 characters"
                 {...register('password')}
               />
               {errors.password && (
@@ -178,29 +185,20 @@ function LoginPage() {
             >
               {submitting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing in…
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating
+                  account…
                 </>
               ) : (
-                'Sign in'
+                'Create account'
               )}
             </Button>
-
-            <button
-              type="button"
-              className="block w-full text-center text-xs text-muted-foreground hover:text-foreground"
-              onClick={() =>
-                toast.info('Contact your coordinator to reset your password.')
-              }
-            >
-              Forgot password?
-            </button>
-            <p className="pt-2 text-center text-xs text-muted-foreground">
-              New to SmartSeason?{' '}
+            <p className="text-center text-xs text-muted-foreground">
+              Already have an account?{' '}
               <Link
-                to="/signup"
+                to="/login"
                 className="font-medium text-primary hover:underline"
               >
-                Create an account
+                Sign in
               </Link>
             </p>
           </form>

@@ -16,6 +16,7 @@ const FARM_SELECT = {
   name: true,
   slug: true,
   description: true,
+  inviteCode: true,
   isActive: true,
   createdAt: true,
   _count: { select: { users: true, fields: true } },

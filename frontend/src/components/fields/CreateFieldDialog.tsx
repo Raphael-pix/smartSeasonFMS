@@ -96,7 +96,7 @@ export function CreateFieldDialog({
       reset()
       onOpenChange(false)
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Failed to create field')
+      toast.error('Failed to create field')
     }
   }
 

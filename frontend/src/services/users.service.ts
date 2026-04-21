@@ -20,9 +20,10 @@ export const usersService = {
     const { data } = await apiClient.patch<User>(`/users/${id}`, input)
     return data
   },
-  async invite(email: string) {
+  async invite(email: string, inviteCode: string) {
     await apiClient.post(`/users/invite`, {
       email,
+      inviteCode,
     })
   },
 }

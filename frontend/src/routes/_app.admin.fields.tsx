@@ -18,6 +18,8 @@ import {
 import { TableRowSkeleton } from '@/components/fields/FieldsSkeleton'
 import { CreateFieldDialog } from '@/components/fields/CreateFieldDialog'
 import { timeAgo } from '@/lib/format'
+import { Switch } from '#/components/ui/switch'
+import { Label } from '#/components/ui/label'
 
 export const Route = createFileRoute('/_app/admin/fields')({
   component: AdminFieldsPage,
@@ -112,7 +114,6 @@ function AdminFieldsPage() {
                 </SelectContent>
               </Select>
             </div>
-            {/*
             <div className="flex items-center gap-2 md:col-span-2 md:justify-end">
               <Switch
                 id="archived"
@@ -126,7 +127,6 @@ function AdminFieldsPage() {
                 Include archived
               </Label>
             </div>
-            */}
           </div>
 
           {isError && (

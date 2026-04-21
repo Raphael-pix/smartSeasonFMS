@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { useUsers } from '@/hooks/useUsers'
+import { useUpdateRole, useUsers } from '@/hooks/useUsers'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Pagination } from '@/components/ui/PagerControls'
@@ -12,20 +12,32 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { TableRowSkeleton } from '@/components/fields/FieldsSkeleton'
-import { Plus, Search, Users as UsersIcon } from 'lucide-react'
+import {
+  Crown,
+  Loader2,
+  Plus,
+  Search,
+  UserPen,
+  Users as UsersIcon,
+} from 'lucide-react'
 import { formatDate } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { Button } from '#/components/ui/button'
 import { CreateUserDialog } from '#/components/users/CreateUserDialog'
+import { toast } from 'sonner'
+import type { User } from '#/types/api.types'
+import { useAuthStore } from '#/stores/authStore'
 
 export const Route = createFileRoute('/_app/admin/users')({
   component: AdminUsersPage,
 })
 
 function AdminUsersPage() {
+  const self = useAuthStore((s) => s.user)
   const [page, setPage] = useState(1)
   const [role, setRole] = useState<string>('all')
   const [createOpen, setCreateOpen] = useState(false)
+  const updateMutation = useUpdateRole()
   const [q, setQ] = useState('')
   const { data, isLoading, isError } = useUsers({
     page,
@@ -41,6 +53,31 @@ function AdminUsersPage() {
         (u.fullName ?? '').toLowerCase().includes(t)
       )
     }) ?? []
+
+  const updateRole = async (user: User) => {
+    if (user.id === self?.id) {
+      toast.error('You cannot change your own role')
+      return
+    }
+
+    const isAdmin = user.role === 'ADMIN'
+    const nextRole = isAdmin ? 'AGENT' : 'ADMIN'
+
+    try {
+      await updateMutation.mutateAsync({
+        id: user.id,
+        input: { role: nextRole },
+      })
+
+      toast.success(
+        `User ${user.fullName || user.email} has been ${
+          isAdmin ? 'demoted to agent' : 'promoted to admin'
+        }`,
+      )
+    } catch {
+      toast.error('Failed to update user role')
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -105,6 +142,7 @@ function AdminUsersPage() {
                   <th className="px-4 py-2 font-medium">Role</th>
                   <th className="px-4 py-2 font-medium">Status</th>
                   <th className="px-4 py-2 font-medium">Joined</th>
+                  <th className="px-4 py-2 font-medium w-35"></th>
                 </tr>
               </thead>
               <tbody>
@@ -123,54 +161,79 @@ function AdminUsersPage() {
                     </td>
                   </tr>
                 ) : (
-                  filtered.map((u) => (
-                    <tr
-                      key={u.id}
-                      className="border-b border-border last:border-0 hover:bg-muted/40"
-                    >
-                      <td className="px-4 py-3 font-medium text-foreground">
-                        {u.email}
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground">
-                        {u.fullName ?? '—'}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={cn(
-                            'inline-flex rounded-md px-2 py-0.5 text-xs font-medium',
-                            u.role === 'ADMIN'
-                              ? 'bg-accent text-accent-foreground'
-                              : 'bg-primary-soft text-primary',
-                          )}
-                        >
-                          {u.role}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={cn(
-                            'inline-flex items-center gap-1.5 text-xs',
-                            u.isActive
-                              ? 'text-success'
-                              : 'text-muted-foreground',
-                          )}
-                        >
+                  filtered.map((u) => {
+                    const isSelf = u.id === self?.id
+                    return (
+                      <tr
+                        key={u.id}
+                        className="border-b border-border last:border-0 hover:bg-muted/40"
+                      >
+                        <td className="px-4 py-3 font-medium text-foreground">
+                          {u.email}
+                        </td>
+                        <td className="px-4 py-3 text-muted-foreground">
+                          {u.fullName ?? '—'}
+                        </td>
+                        <td className="px-4 py-3">
                           <span
                             className={cn(
-                              'h-1.5 w-1.5 rounded-full',
-                              u.isActive
-                                ? 'bg-success'
-                                : 'bg-neutral-soft-foreground',
+                              'inline-flex rounded-md px-2 py-0.5 text-xs font-medium',
+                              u.role === 'ADMIN'
+                                ? 'bg-accent text-accent-foreground'
+                                : 'bg-primary-soft text-primary',
                             )}
-                          />
-                          {u.isActive ? 'Active' : 'Inactive'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground">
-                        {formatDate(u.createdAt)}
-                      </td>
-                    </tr>
-                  ))
+                          >
+                            {u.role}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={cn(
+                              'inline-flex items-center gap-1.5 text-xs',
+                              u.isActive
+                                ? 'text-success'
+                                : 'text-muted-foreground',
+                            )}
+                          >
+                            <span
+                              className={cn(
+                                'h-1.5 w-1.5 rounded-full',
+                                u.isActive
+                                  ? 'bg-success'
+                                  : 'bg-neutral-soft-foreground',
+                              )}
+                            />
+                            {u.isActive ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-muted-foreground">
+                          {formatDate(u.createdAt)}
+                        </td>
+                        {!isSelf && (
+                          <td className="px-4 py-3 text-right w-35">
+                            <div className="inline-flex">
+                              <Button
+                                className="min-w-22.5"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => updateRole(u)}
+                                disabled={updateMutation.isPending}
+                              >
+                                {updateMutation.isPending ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : u.role === 'ADMIN' ? (
+                                  <UserPen className="w-4 h-4" />
+                                ) : (
+                                  <Crown className="w-4 h-4" />
+                                )}
+                                {u.role === 'ADMIN' ? 'Demote' : 'Promote'}
+                              </Button>
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    )
+                  })
                 )}
               </tbody>
             </table>

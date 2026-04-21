@@ -17,6 +17,7 @@ const USER_SELECT = {
   role: true,
   fullName: true,
   phone: true,
+  farmId: true,
   isActive: true,
   createdAt: true,
   updatedAt: true,
@@ -64,9 +65,9 @@ export class UserService {
     };
   }
 
-  async findById(id: string, requestingUser: JwtUser) {
+  async findById(id: string) {
     const user = await this.prisma.user.findUnique({
-      where: { id, farmId: requestingUser.id },
+      where: { id },
       select: USER_SELECT,
     });
 
@@ -74,8 +75,8 @@ export class UserService {
     return user;
   }
 
-  async update(id: string, dto: UpdateUserDto, requestingUser: JwtUser) {
-    await this.findById(id, requestingUser);
+  async update(id: string, dto: UpdateUserDto) {
+    await this.findById(id);
 
     return this.prisma.user.update({
       where: { id },
@@ -89,8 +90,8 @@ export class UserService {
     });
   }
 
-  async deactivate(id: string, requestingUser: JwtUser) {
-    await this.findById(id, requestingUser);
+  async deactivate(id: string) {
+    await this.findById(id);
 
     return this.prisma.user.update({
       where: { id },
@@ -99,11 +100,14 @@ export class UserService {
     });
   }
 
-  async inviteUser(email: string) {
+  async inviteUser(email: string, inviteCode: string) {
     const { data, error } = await this.supabase.auth.admin.inviteUserByEmail(
       email,
       {
         redirectTo: `${this.config.get('frontend.url', { infer: true })}auth/complete-profile`,
+        data: {
+          inviteCode,
+        },
       },
     );
 

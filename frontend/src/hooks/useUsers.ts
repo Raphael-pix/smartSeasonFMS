@@ -26,7 +26,13 @@ export function useMe(enabled = true) {
 
 export function useInviteUser() {
   return useMutation({
-    mutationFn: (email: string) => usersService.invite(email),
+    mutationFn: ({
+      email,
+      inviteCode,
+    }: {
+      email: string
+      inviteCode: string
+    }) => usersService.invite(email, inviteCode),
   })
 }
 
@@ -37,6 +43,18 @@ export function useUpdateUser(id: string) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['users'] })
       qc.invalidateQueries({ queryKey: ['users', id] })
+      qc.invalidateQueries({ queryKey: ['users', 'agents'] })
+    },
+  })
+}
+
+export function useUpdateRole() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: Partial<User> }) =>
+      usersService.update(id, input),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['users'] })
       qc.invalidateQueries({ queryKey: ['users', 'agents'] })
     },
   })

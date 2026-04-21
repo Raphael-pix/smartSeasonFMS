@@ -11,6 +11,7 @@ import { AuthProvider } from '@/components/AuthProvider'
 import type { RouterAppContext } from '@/router'
 
 import appCss from '../styles.css?url'
+import { ThemeProvider } from '#/components/ThemeProvider'
 
 function NotFoundComponent() {
   return (
@@ -81,10 +82,12 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext()
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Outlet />
-        <Toaster richColors position="top-right" />
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <Outlet />
+          <Toaster richColors position="top-right" />
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   )
 }

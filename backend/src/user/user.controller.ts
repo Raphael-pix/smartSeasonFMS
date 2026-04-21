@@ -28,6 +28,7 @@ import type { JwtUser } from '@/auth/types/request-user.type';
 
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { AllowWithoutFarm } from '@/auth/decorators/allowed-without-farm.decorator';
 
 @ApiTags('Users')
 @ApiBearerAuth('supabase-jwt')
@@ -64,16 +65,17 @@ export class UserController {
   }
 
   @Get('me')
+  @AllowWithoutFarm()
   @ApiOperation({ summary: 'Get own profile' })
   getMe(@CurrentUser() user: JwtUser) {
-    return this.userService.findById(user.id, user);
+    return this.userService.findById(user.id);
   }
 
   @Post('invite')
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Invite a user' })
-  inviteUser(@Body() body: { email: string }) {
-    return this.userService.inviteUser(body.email);
+  inviteUser(@Body() body: { email: string; inviteCode: string }) {
+    return this.userService.inviteUser(body.email, body.inviteCode);
   }
 
   @Get(':id')
@@ -85,10 +87,11 @@ export class UserController {
     if (user.role !== Role.ADMIN && user.id !== id) {
       throw new ForbiddenException('You can only view your own profile');
     }
-    return this.userService.findById(id, user);
+    return this.userService.findById(id);
   }
 
   @Patch(':id')
+  @AllowWithoutFarm()
   @ApiOperation({ summary: 'Update user' })
   @HttpCode(HttpStatus.OK)
   async update(
@@ -104,6 +107,6 @@ export class UserController {
       delete dto.isActive;
     }
 
-    return this.userService.update(id, dto, user);
+    return this.userService.update(id, dto);
   }
 }

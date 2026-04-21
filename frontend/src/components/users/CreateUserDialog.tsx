@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useState } from 'react'
 import { useInviteUser } from '#/hooks/useUsers'
+import { useMyFarm } from '#/hooks/useFarms'
 
 export function CreateUserDialog({
   open,
@@ -22,6 +23,7 @@ export function CreateUserDialog({
   onOpenChange: (v: boolean) => void
 }) {
   const createMutation = useInviteUser()
+  const { data: farm } = useMyFarm()
 
   const [email, setEmail] = useState('')
   const onSubmit = async (e: React.SubmitEvent) => {
@@ -30,8 +32,12 @@ export function CreateUserDialog({
       toast.error('Enter a valid email')
       return
     }
+    if (!farm) {
+      toast.error('There is no associated farm')
+      return
+    }
     try {
-      await createMutation.mutateAsync(email)
+      await createMutation.mutateAsync({ email, inviteCode: farm.inviteCode })
       toast.success('Invite sent successfully')
       onOpenChange(false)
     } catch (error) {

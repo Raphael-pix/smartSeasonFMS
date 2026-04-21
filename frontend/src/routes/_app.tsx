@@ -5,8 +5,18 @@ import { useAuthStore } from '@/stores/authStore'
 export const Route = createFileRoute('/_app')({
   beforeLoad: () => {
     const { user, isLoading } = useAuthStore.getState()
+
     if (!isLoading && !user) {
       throw redirect({ to: '/login' })
+    }
+
+    if (
+      !isLoading &&
+      user &&
+      !user.farmId &&
+      location.pathname !== '/onboarding'
+    ) {
+      throw redirect({ to: '/onboarding' })
     }
   },
   component: AppLayout,

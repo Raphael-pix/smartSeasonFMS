@@ -51,7 +51,9 @@ export class DashboardService {
       stageBreakdown,
       activeAgents,
     ] = await Promise.all([
-      this.prisma.field.count({ where: { isArchived: false } }),
+      this.prisma.field.count({
+        where: { farmId: user.farmId, isArchived: false },
+      }),
 
       this.fieldsService.countByStatus(user.farmId),
 
