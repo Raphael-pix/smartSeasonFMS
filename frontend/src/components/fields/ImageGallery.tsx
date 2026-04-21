@@ -5,7 +5,6 @@ import pLimit from 'p-limit'
 import {
   useDeleteImage,
   useFieldImages,
-  useUploadFieldImage,
   useUploadImage,
 } from '@/hooks/useImages'
 import { Button } from '@/components/ui/button'
@@ -18,11 +17,10 @@ const MAX_BYTES = 5 * 1024 * 1024
 export function ImageGallery({ fieldId }: { fieldId: string }) {
   const role = useAuthStore((s) => s.role)
   const { data, isLoading } = useFieldImages(fieldId)
-  const upload = useUploadImage(fieldId)
   const remove = useDeleteImage(fieldId)
   const inputRef = useRef<HTMLInputElement>(null)
   const [dragOver, setDragOver] = useState(false)
-  const uploadMutation = useUploadFieldImage()
+  const uploadMutation = useUploadImage(fieldId)
 
   const handleFiles = async (files: FileList | null) => {
     if (!files) return
@@ -85,9 +83,9 @@ export function ImageGallery({ fieldId }: { fieldId: string }) {
           type="button"
           size="sm"
           onClick={() => inputRef.current?.click()}
-          disabled={upload.isPending}
+          disabled={uploadMutation.isPending}
         >
-          {upload.isPending ? (
+          {uploadMutation.isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <Upload className="h-4 w-4" />

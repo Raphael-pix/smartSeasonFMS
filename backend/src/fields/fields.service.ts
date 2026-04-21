@@ -240,6 +240,18 @@ export class FieldsService {
     return this.attachStatus(archived);
   }
 
+  async unarchive(id: string, user: JwtUser) {
+    await this.findOne(id, user);
+
+    const archived = await this.prisma.field.update({
+      where: { id },
+      data: { isArchived: false, updatedById: user.id },
+      select: FIELD_DETAIL_SELECT,
+    });
+    await this.cache.invalidateOnFieldUpdate(id);
+    return this.attachStatus(archived);
+  }
+
   async syncLastUpdatedAt(
     fieldId: string,
     observedAt: Date,

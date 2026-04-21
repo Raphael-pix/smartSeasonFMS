@@ -74,7 +74,6 @@ export class FieldsController {
   ) {
     return this.fieldsService.update(id, dto, user);
   }
-
   @Delete(':id')
   @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.OK)
@@ -84,5 +83,16 @@ export class FieldsController {
     @CurrentUser() user: JwtUser,
   ) {
     return this.fieldsService.archive(id, user);
+  }
+
+  @Patch(':id/unarchive')
+  @Roles(Role.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Unarchive a field [Admin]' })
+  unarchive(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: JwtUser,
+  ) {
+    return this.fieldsService.unarchive(id, user);
   }
 }

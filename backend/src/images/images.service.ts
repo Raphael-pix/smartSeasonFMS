@@ -40,7 +40,7 @@ export class ImagesService {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.supabase = createClient(
       this.config.get('supabase.url', { infer: true }),
-      this.config.get('supabase.publishableKey', { infer: true }),
+      this.config.get('supabase.serviceRoleKey', { infer: true }),
     );
 
     this.bucket = this.config.get('supabase.storageBucket', { infer: true });

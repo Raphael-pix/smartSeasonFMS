@@ -15,8 +15,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
 import { TableRowSkeleton } from '@/components/fields/FieldsSkeleton'
 import { CreateFieldDialog } from '@/components/fields/CreateFieldDialog'
 import { timeAgo } from '@/lib/format'
@@ -62,7 +60,6 @@ function AdminFieldsPage() {
 
       <Card>
         <CardContent className="space-y-3 p-3 md:p-4">
-          {/* Filters */}
           <div className="grid grid-cols-1 gap-2 md:grid-cols-12">
             <div className="relative md:col-span-4">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -115,6 +112,7 @@ function AdminFieldsPage() {
                 </SelectContent>
               </Select>
             </div>
+            {/*
             <div className="flex items-center gap-2 md:col-span-2 md:justify-end">
               <Switch
                 id="archived"
@@ -125,9 +123,10 @@ function AdminFieldsPage() {
                 }}
               />
               <Label htmlFor="archived" className="text-xs">
-                Show archived
+                Include archived
               </Label>
             </div>
+            */}
           </div>
 
           {isError && (
@@ -136,7 +135,6 @@ function AdminFieldsPage() {
             </div>
           )}
 
-          {/* Table */}
           <div className="overflow-x-auto rounded-lg border border-border">
             <table className="w-full min-w-190 text-sm">
               <thead>

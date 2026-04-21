@@ -16,7 +16,11 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { StageBadge } from '@/components/ui/StageBadge'
-import { useFieldDetail, useArchiveField } from '@/hooks/useFields'
+import {
+  useFieldDetail,
+  useArchiveField,
+  useUnarchiveField,
+} from '@/hooks/useFields'
 import { useFieldUpdates } from '@/hooks/useUpdates'
 import { useAuthStore } from '@/stores/authStore'
 import { formatDate, formatDateTime, timeAgo } from '@/lib/format'
@@ -38,9 +42,11 @@ function FieldDetailPage() {
   const { data: field, isLoading, isError } = useFieldDetail(id)
   const { data: updates, isLoading: updatesLoading } = useFieldUpdates(id)
   const archive = useArchiveField()
+  const unarchive = useUnarchiveField()
 
   const isAssignedAgent =
     role === 'AGENT' && field?.agent?.id === user?.id && !field?.isArchived
+  const isAdmin = role === 'ADMIN'
 
   const fallbackBack = role === 'ADMIN' ? '/admin/fields' : '/agent/fields'
 
@@ -112,8 +118,30 @@ function FieldDetailPage() {
                             )
                           }
                         }}
+                        disabled={archive.isPending}
                       >
                         <Archive className="h-4 w-4" /> Archive
+                      </Button>
+                    )}
+                    {field.isArchived && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                          try {
+                            await unarchive.mutateAsync(field.id)
+                            toast.success('Field removed from archives')
+                          } catch (e) {
+                            toast.error(
+                              e instanceof Error
+                                ? e.message
+                                : 'Unarchive failed',
+                            )
+                          }
+                        }}
+                        disabled={unarchive.isPending}
+                      >
+                        <Archive className="h-4 w-4" /> Unarchive
                       </Button>
                     )}
                   </div>
@@ -167,12 +195,14 @@ function FieldDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Tabs */}
           <Tabs defaultValue={isAssignedAgent ? 'submit' : 'updates'}>
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="updates">Updates</TabsTrigger>
               <TabsTrigger value="images">Images</TabsTrigger>
-              <TabsTrigger value="submit" disabled={!isAssignedAgent}>
+              <TabsTrigger
+                value="submit"
+                disabled={!isAssignedAgent && !isAdmin}
+              >
                 Submit
               </TabsTrigger>
             </TabsList>
@@ -238,7 +268,7 @@ function FieldDetailPage() {
             <TabsContent value="submit" className="mt-4">
               <Card>
                 <CardContent className="p-3 md:p-4">
-                  {isAssignedAgent ? (
+                  {isAssignedAgent || isAdmin ? (
                     <SubmitUpdateForm
                       fieldId={field.id}
                       defaultStage={field.currentStage}
@@ -253,11 +283,13 @@ function FieldDetailPage() {
             </TabsContent>
           </Tabs>
 
-          <UpdateFieldDialog
-            field={field}
-            open={createOpen}
-            onOpenChange={setCreateOpen}
-          />
+          {isAdmin && (
+            <UpdateFieldDialog
+              field={field}
+              open={createOpen}
+              onOpenChange={setCreateOpen}
+            />
+          )}
         </>
       )}
     </div>

@@ -60,3 +60,14 @@ export function useArchiveField() {
     },
   })
 }
+
+export function useUnarchiveField() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => fieldsService.unarchive(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['fields'] })
+      qc.invalidateQueries({ queryKey: ['dashboard'] })
+    },
+  })
+}

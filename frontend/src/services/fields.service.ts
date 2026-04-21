@@ -69,4 +69,10 @@ export const fieldsService = {
     const { data } = await apiClient.delete<FieldDetail>(`/fields/${id}`)
     return data
   },
+  async unarchive(id: string) {
+    const { data } = await apiClient.patch<FieldDetail>(
+      `/fields/${id}/unarchive`,
+    )
+    return data
+  },
 }

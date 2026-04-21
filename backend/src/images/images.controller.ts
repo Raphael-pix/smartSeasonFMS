@@ -94,7 +94,7 @@ export class ImagesController {
   @ApiOperation({ summary: 'Upload image url' })
   @ApiParam({ name: 'fieldId', type: String })
   getUploadUrl(
-    @Param('fieldId') fieldId: string,
+    @Param('fieldId', ParseUUIDPipe) fieldId: string,
     @Body('fileName') fileName: string,
     @CurrentUser() user?: JwtUser,
   ) {
@@ -105,7 +105,7 @@ export class ImagesController {
   @ApiOperation({ summary: 'Confirm image url' })
   @ApiParam({ name: 'fieldId', type: String })
   confirmUpload(
-    @Param('fieldId') fieldId: string,
+    @Param('fieldId', ParseUUIDPipe) fieldId: string,
     @Body() dto: ConfirmUploadDto,
     @CurrentUser() user?: JwtUser,
   ) {

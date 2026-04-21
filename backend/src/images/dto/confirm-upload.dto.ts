@@ -1,15 +1,6 @@
-import {
-  IsBoolean,
-  IsOptional,
-  IsString,
-  IsUUID,
-  MinLength,
-} from 'class-validator';
+import { IsBoolean, IsOptional, IsString, MinLength } from 'class-validator';
 
 export class ConfirmUploadDto {
-  @IsUUID()
-  fieldId: string;
-
   @IsString()
   @MinLength(5)
   path: string;

@@ -111,19 +111,19 @@ export function CreateFieldDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-          <Field label="Field name" error={errors.name?.message}>
+          <Field label="Field name*" error={errors.name?.message}>
             <Input placeholder="e.g. Kiptoo North Plot" {...register('name')} />
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Crop type" error={errors.cropType?.message}>
+            <Field label="Crop type*" error={errors.cropType?.message}>
               <Input placeholder="Maize" {...register('cropType')} />
             </Field>
-            <Field label="Planting date" error={errors.plantingDate?.message}>
+            <Field label="Planting date*" error={errors.plantingDate?.message}>
               <Input type="date" {...register('plantingDate')} />
             </Field>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Stage">
+            <Field label="Stage*">
               <Select
                 value={currentStage}
                 onValueChange={(v) =>
@@ -173,7 +173,7 @@ export function CreateFieldDialog({
           </Field>
 
           <div className="grid grid-cols-3 gap-3">
-            <Field label="County" error={errors.county?.message}>
+            <Field label="County*" error={errors.county?.message}>
               <Input placeholder="Nakuru" {...register('county')} />
             </Field>
             <Field label="Sub-county">

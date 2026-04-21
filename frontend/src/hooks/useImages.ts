@@ -9,18 +9,6 @@ export function useFieldImages(fieldId: string | undefined) {
   })
 }
 
-export function useUploadImage(fieldId: string) {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({ file, caption }: { file: File; caption?: string }) =>
-      imagesService.upload(fieldId, file, caption),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['fields', fieldId, 'images'] })
-      qc.invalidateQueries({ queryKey: ['fields', fieldId] })
-    },
-  })
-}
-
 export function useDeleteImage(fieldId: string) {
   const qc = useQueryClient()
   return useMutation({
@@ -38,7 +26,8 @@ type UploadInput = {
   setCover?: boolean
 }
 
-export function useUploadFieldImage() {
+export function useUploadImage(fieldId: string) {
+  const qc = useQueryClient()
   return useMutation({
     mutationFn: async (input: UploadInput) => {
       const { uploadUrl, path } = await imagesService.getUploadUrl(
@@ -53,6 +42,10 @@ export function useUploadFieldImage() {
         caption: input.caption,
         setCover: input.setCover,
       })
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['fields', fieldId, 'images'] })
+      qc.invalidateQueries({ queryKey: ['fields', fieldId] })
     },
   })
 }
