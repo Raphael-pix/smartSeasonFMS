@@ -238,7 +238,7 @@ Security is enforced at multiple layers:
 - Row Level Security (Postgres RLS)
 - Service-layer ownership checks
 
-## 15. Assumptions Made
+## Assumptions Made
 
 The following assumptions were made during system design and implementation.
 
@@ -290,7 +290,7 @@ Architecture is optimized for:
 
 > Not yet designed for multi-region global scale.
 
-## 16. Demo Credentials (Testing)
+## Demo Credentials (Testing)
 
 Use the following accounts to test the system.
 
