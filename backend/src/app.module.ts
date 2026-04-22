@@ -16,6 +16,7 @@ import { JobsModule } from './jobs/jobs.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { FarmsModule } from './farms/farms.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -69,6 +70,8 @@ import { NotificationsModule } from './notifications/notifications.module';
     JobsModule,
 
     NotificationsModule,
+
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
