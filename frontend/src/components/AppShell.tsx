@@ -17,6 +17,7 @@ import { useOfflineQueueStore } from '@/stores/offlineQueueStore'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { NotificationBell } from './notifications/NotificationBell'
 
 interface NavItem {
   to: string
@@ -104,6 +105,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <CloudUpload className="h-3.5 w-3.5" /> {queue.length} queued
               </span>
             )}
+            <NotificationBell />
             <Link
               to="/profile"
               className="hidden items-center gap-2 rounded-md px-1.5 py-1 transition-colors hover:bg-muted sm:flex"
@@ -206,9 +208,6 @@ function SidebarContent({
           )
         })}
       </nav>
-      <div className="border-t border-sidebar-border p-3 text-xs text-sidebar-foreground/60">
-        <p>Built for low-bandwidth field work.</p>
-      </div>
     </>
   )
 }

@@ -185,15 +185,12 @@ function LoginPage() {
               )}
             </Button>
 
-            <button
-              type="button"
+            <Link
+              to="/forgot-password"
               className="block w-full text-center text-xs text-muted-foreground hover:text-foreground"
-              onClick={() =>
-                toast.info('Contact your coordinator to reset your password.')
-              }
             >
               Forgot password?
-            </button>
+            </Link>
             <p className="pt-2 text-center text-xs text-muted-foreground">
               New to SmartSeason?{' '}
               <Link
