@@ -61,7 +61,7 @@ function AgentDashboardPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
         <SummaryCard label="Assigned" value={totalAssigned} icon={Sprout} />
         <SummaryCard
           label="Active"
@@ -77,7 +77,6 @@ function AgentDashboardPage() {
         />
       </div>
 
-      {/* Attention required */}
       {(data?.attentionRequired.length ?? 0) > 0 && (
         <Card className="border-warning/40 bg-warning-soft/40">
           <CardHeader>
@@ -96,7 +95,6 @@ function AgentDashboardPage() {
         </Card>
       )}
 
-      {/* All assigned fields */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
@@ -127,12 +125,11 @@ function AgentDashboardPage() {
         )}
       </section>
 
-      {/* Recent activity */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Your recent updates</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-3 max-h-90 overflow-y-scroll scrollbar-hide">
           {isLoading ? (
             Array.from({ length: 3 }).map((_, i) => (
               <Skeleton key={i} className="h-16 w-full" />
