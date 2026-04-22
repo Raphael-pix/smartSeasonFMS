@@ -33,10 +33,6 @@ function ForgotPasswordPage() {
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
   const onSubmit = async (values: FormValues) => {
-    if (!isSupabaseConfigured) {
-      toast.error('Supabase is not configured. Add VITE_SUPABASE_* to .env.')
-      return
-    }
     setSubmitting(true)
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(
@@ -59,7 +55,6 @@ function ForgotPasswordPage() {
 
   return (
     <div className="grid min-h-screen w-full grid-cols-1 lg:grid-cols-2">
-      {/* Brand panel */}
       <div className="relative hidden flex-col justify-between overflow-hidden bg-sidebar p-10 text-sidebar-foreground lg:flex">
         <div className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
@@ -88,7 +83,6 @@ function ForgotPasswordPage() {
         />
       </div>
 
-      {/* Form panel */}
       <div className="flex items-center justify-center bg-background px-6 py-10">
         <div className="w-full max-w-sm">
           <div className="mb-8 flex items-center gap-2 lg:hidden">

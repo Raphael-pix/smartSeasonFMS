@@ -7,7 +7,7 @@ import { Sprout, Loader2, KeyRound, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { supabase, isSupabaseConfigured } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 
 const schema = z
@@ -34,9 +34,6 @@ function ResetPasswordPage() {
     null,
   )
 
-  // Supabase emits a PASSWORD_RECOVERY auth event when the user lands
-  // here from the reset email. We also check for an existing session as a
-  // fallback (in case the event already fired before this component mounted).
   useEffect(() => {
     let cancelled = false
 
@@ -70,10 +67,6 @@ function ResetPasswordPage() {
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
   const onSubmit = async (values: FormValues) => {
-    if (!isSupabaseConfigured) {
-      toast.error('Supabase is not configured.')
-      return
-    }
     setSubmitting(true)
     try {
       const { error } = await supabase.auth.updateUser({
@@ -82,9 +75,8 @@ function ResetPasswordPage() {
       if (error) throw error
       setDone(true)
       toast.success('Password updated. Please sign in.')
-      // Sign out the recovery session so the user logs in fresh.
       await supabase.auth.signOut()
-      setTimeout(() => navigate({ to: '/login' }), 1500)
+      setTimeout(() => navigate({ to: '/login' }), 1000)
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Couldn't update password."
       toast.error(msg)
@@ -95,7 +87,6 @@ function ResetPasswordPage() {
 
   return (
     <div className="grid min-h-screen w-full grid-cols-1 lg:grid-cols-2">
-      {/* Brand panel */}
       <div className="relative hidden flex-col justify-between overflow-hidden bg-sidebar p-10 text-sidebar-foreground lg:flex">
         <div className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
@@ -123,7 +114,6 @@ function ResetPasswordPage() {
         />
       </div>
 
-      {/* Form panel */}
       <div className="flex items-center justify-center bg-background px-6 py-10">
         <div className="w-full max-w-sm">
           <div className="mb-8 flex items-center gap-2 lg:hidden">
