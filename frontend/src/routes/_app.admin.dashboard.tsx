@@ -152,7 +152,7 @@ function AdminDashboardPage() {
               View all →
             </Link>
           </CardHeader>
-          <CardContent className="p-0">
+          <CardContent className="p-0 max-h-90 overflow-y-scroll scrollbar-hide">
             {isLoading ? (
               <div className="space-y-2 p-4">
                 {Array.from({ length: 3 }).map((_, i) => (
@@ -215,7 +215,7 @@ function AdminDashboardPage() {
           <CardHeader>
             <CardTitle className="text-base">Recent activity</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-3 max-h-90 overflow-y-scroll scrollbar-hide">
             {isLoading ? (
               Array.from({ length: 4 }).map((_, i) => (
                 <Skeleton key={i} className="h-14 w-full" />
