@@ -130,8 +130,7 @@ The system is designed with rural usage in mind:
 
 Core entities:
 
--**Farm**
-
+- **Farm**
 - **User**
 - **Field**
 - **FieldUpdate**
