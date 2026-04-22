@@ -127,3 +127,38 @@ export interface AgentDashboard {
   })[]
   generatedAt: string
 }
+
+export type NotificationType =
+  | 'FIELD_AT_RISK'
+  | 'FIELD_UPDATE'
+  | 'FIELD_ASSIGNED'
+  | 'SYSTEM'
+
+export interface NotificationMetadata {
+  fieldId?: string
+  fieldName?: string
+  cropType?: string
+  agentId: string | null
+  [key: string]: unknown
+}
+
+export interface AppNotification {
+  id: string
+  type: NotificationType | string
+  title: string
+  message: string
+  isRead: boolean
+  readAt: string | null
+  fieldId?: string
+  metadata: NotificationMetadata | null
+  createdAt: string
+}
+
+export interface NotificationsResponse {
+  data: AppNotification[]
+  meta: PaginationMeta
+}
+
+export interface UnreadCountResponse {
+  unreadCount: number
+}

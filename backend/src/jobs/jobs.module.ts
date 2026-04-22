@@ -8,6 +8,7 @@ import { QUEUE_FIELD_STATUS, QUEUE_DASHBOARD } from './jobs.constants';
 import { JobsScheduler } from './jobs.scheduler';
 import { FieldStatusProcessor } from './processors/field-status.processor';
 import { DashboardProcessor } from './processors/dashboard.processor';
+import { NotificationsModule } from '@/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { DashboardProcessor } from './processors/dashboard.processor';
     ),
     FieldsModule,
     DashboardModule,
+    NotificationsModule,
   ],
   providers: [JobsScheduler, FieldStatusProcessor, DashboardProcessor],
 })
