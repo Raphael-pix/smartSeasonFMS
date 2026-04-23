@@ -9,7 +9,6 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
 import { AuthProvider } from '@/components/AuthProvider'
 import type { RouterAppContext } from '@/router'
-import { Analytics } from '@vercel/analytics/next'
 
 import appCss from '../styles.css?url'
 import { ThemeProvider } from '#/components/ThemeProvider'
@@ -87,7 +86,6 @@ function RootComponent() {
         <AuthProvider>
           <Outlet />
           <Toaster richColors position="top-right" />
-          <Analytics />
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
